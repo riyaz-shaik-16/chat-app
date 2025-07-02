@@ -1,27 +1,32 @@
 import redisClient from "../config/redisClient.js";
+import { sendMessageService } from "../services/message.service.js";
 
 const init = (io) => {
   io.on("connection", async (socket) => {
     const getQueueKey = (username) => `unseenMessages:${username}`;
+
     const broadcastOnlineUsers = async () => {
       const users = await redisClient.hKeys("online_users");
       io.emit("online_users_list", users);
     };
+
     console.log("User connected:", socket.id);
 
     socket.on("register", async (userName) => {
       try {
         socket.username = userName;
 
+        socket.join(userName);
+
         const isAlreadyOnline = await redisClient.hExists(
           "online_users",
           userName
         );
         if (!isAlreadyOnline) {
-          await redisClient.hSet("online_users", userName, socket.id);
-          console.log(`${userName} registered with ID ${socket.id}`);
+          await redisClient.hSet("online_users", userName, "true");
+          console.log(`${userName} registered and joined room ${userName}`);
         } else {
-          console.log(`${userName} already online`);
+          console.log(`${userName} is already online`);
         }
 
         const queuedMessages = await redisClient.lRange(
@@ -29,12 +34,10 @@ const init = (io) => {
           0,
           -1
         );
-
         if (queuedMessages.length > 0) {
           queuedMessages.forEach((msg) => {
-            io.to(socket.id).emit("receive_message", JSON.parse(msg));
+            socket.emit("receive_message", JSON.parse(msg));
           });
-
           await redisClient.del(getQueueKey(userName));
         }
 
@@ -44,35 +47,29 @@ const init = (io) => {
       }
     });
 
-    socket.on("private_message", async ({ to, content }) => {
+    socket.on("send_message", async ({ to, content }) => {
       try {
-        const targetSocketId = await redisClient.hGet("online_users", to);
-        const messagePayload = {
-          from: socket.username,
-          content,
-          timestamp: new Date().toISOString(),
-        };
+        const from = socket.username;
 
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("receive_message", messagePayload);
-        } else {
-          console.log(`User "${to}" is not online.`);
-          await redisClient.rPush(
-            getQueueKey(to),
-            JSON.stringify(messagePayload)
-          );
+        const { status, payload } = await sendMessageService({
+          from,
+          to,
+          content,
+        });
+
+        if (status === "online") {
+          io.to(to).emit("receive_message", payload);
         }
+        socket.emit("message_sent", payload);
       } catch (err) {
-        console.error("Error in private_message:", err.message);
+        console.error("Private message error:", err.message);
+        socket.emit("message_error", { error: err.message });
       }
     });
 
     socket.on("typing", async ({ to }) => {
       try {
-        const targetSocketId = await redisClient.hGet("online_users", to);
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("typing", { from: socket.username });
-        }
+        io.to(to).emit("typing", { from: socket.username });
       } catch (err) {
         console.error("Error in typing:", err.message);
       }
@@ -80,10 +77,7 @@ const init = (io) => {
 
     socket.on("stop_typing", async ({ to }) => {
       try {
-        const targetSocketId = await redisClient.hGet("online_users", to);
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("stop_typing", { from: socket.username });
-        }
+        io.to(to).emit("stop_typing", { from: socket.username });
       } catch (err) {
         console.error("Error in stop_typing:", err.message);
       }
@@ -93,7 +87,8 @@ const init = (io) => {
       try {
         if (socket.username) {
           await redisClient.hDel("online_users", socket.username);
-          console.log(`${socket.username} logged out manually`);
+          socket.leave(socket.username);
+          console.log(`${socket.username} manually logged out`);
           await broadcastOnlineUsers();
         }
       } catch (err) {
@@ -105,6 +100,7 @@ const init = (io) => {
       try {
         if (socket.username) {
           await redisClient.hDel("online_users", socket.username);
+          socket.leave(socket.username);
           console.log(`${socket.username} disconnected`);
           await broadcastOnlineUsers();
         }

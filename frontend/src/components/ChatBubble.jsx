@@ -2,9 +2,9 @@ import { Card, CardFooter, CardContent } from "./ui/card";
 
 const ChatBubble = ({ message }) => (
   <Card
-    className={`w-fit h-fit mb-3 max-w-[75%] ${
+    className={`w-fit h-fit mt-3 mb-3 max-w-[75%] ${
       message.user === "You"
-        ? "ml-auto bg-primary-foreground text-white"
+        ? "ml-auto bg-primary-foreground text-dark"
         : "bg-muted"
     }`}
   >

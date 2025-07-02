@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 
 const Home = () => {
   const { user } = useSelector((state) => state.user);
-  const [selectedUser, setSelectedUser] = useState(null);
+  
 
   useEffect(() => {
     socket.connect();
@@ -20,11 +20,8 @@ const Home = () => {
 
   return (
     <div className="flex h-screen">
-      <LeftSideBar
-        setSelectedUser={setSelectedUser}
-        selectedUser={selectedUser}
-      />
-      <ChatContainer selectedUser={selectedUser} />
+      <LeftSideBar/>
+      <ChatContainer className={`flex-1`}/>
     </div>
   );
 };

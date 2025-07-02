@@ -4,13 +4,16 @@ import { createServer } from "http";
 import passport from "passport";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth.route.js";
 import "./config/passport.js";
 import { connectMONGODB } from "./config/db.js";
 import redisClient from "./config/redisClient.js";
 import { Server } from "socket.io";
 import init from "./socket/socket.js"
+import errorHandler from "./middlewares/errorHandler.js";
 
+
+import authRoutes from "./routes/auth.route.js";
+import messageRoutes from "./routes/message.route.js"
 
 dotenv.config();
 
@@ -20,11 +23,13 @@ app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }));
-
+app.use(express.json());
+app.use(errorHandler)
 app.use(cookieParser())
 app.use(passport.initialize());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/messages",messageRoutes);
 
 const server = createServer(app);
 

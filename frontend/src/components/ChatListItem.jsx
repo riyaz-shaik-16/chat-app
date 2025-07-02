@@ -1,14 +1,16 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { SidebarMenuItem } from "./ui/sidebar";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
+import {selectUser} from "@/redux/slices/chat.slice"
 
-const ChatListItem = ({ user, onSelectUser }) => {
-  const { onlineUsers } = useSelector((state) => state.users);
+const ChatListItem = ({ user,className=""}) => {
+  const onlineUsers = useSelector((state) => state.chat.onlineUsers);
+  const dispatch = useDispatch();
   return (
-    <SidebarMenuItem key={user.email} onClick={() => onSelectUser(user?.email)}>
-      <button className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-muted transition-colors">
+    <SidebarMenuItem key={user?.email} onClick={() => dispatch(selectUser(user))}>
+      <button className={`w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-muted transition-colors ${className}`}>
         <div className="relative w-fit">
           <Avatar className="h-12 w-12">
             <AvatarImage src={user?.picture} />

@@ -36,21 +36,26 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/utils/axiosInstance";
 import { setUser, logout } from "@/redux/slices/user.slice";
 import Logout from "./Logout";
-import { setOnlineUsers, setUsers } from "@/redux/slices/users.slice";
 import socket from "@/utils/Socket";
 import ChatListItem from "./ChatListItem";
+import { setOnlineUsers, setUsers } from "@/redux/slices/chat.slice";
 
-const LeftSideBar = ({ selectedUser, setSelectedUser = () => {} }) => {
+const LeftSideBar = ({}) => {
   const { setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
-  const user = useSelector((state) => state.user?.user);
-  const { users } = useSelector((state) => state.users);
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [usersListLoading, setUsersListLoading] = useState(false);
-  const { onlineUsers } = useSelector((state) => state.users);
+
+  const user = useSelector((state) => state.user?.user);
+  const selectedUser = useSelector((state) => state.chat.selectedUser);
+  const users = useSelector((state) => state.chat.users);
+
+
+
 
   const fetchProfile = async () => {
     try {
@@ -84,7 +89,6 @@ const LeftSideBar = ({ selectedUser, setSelectedUser = () => {} }) => {
   };
 
   const handleOnlineUsers = (onlineUsers) => {
-    // console.log("Online users: ",onlineUsers)
     dispatch(setOnlineUsers(onlineUsers));
   };
 
@@ -118,8 +122,8 @@ const LeftSideBar = ({ selectedUser, setSelectedUser = () => {} }) => {
                     users?.map((user) => (
                       <ChatListItem
                         key={user.email}
-                        onSelectUser={setSelectedUser}
                         user={user}
+                        className={`${selectedUser?.email === user?.email ? "bg-muted" : null}`}
                       ></ChatListItem>
                     ))}
                   <ScrollBar />
