@@ -44,7 +44,6 @@ const LeftSideBar = ({}) => {
   const { setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
-  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -53,9 +52,6 @@ const LeftSideBar = ({}) => {
   const user = useSelector((state) => state.user?.user);
   const selectedUser = useSelector((state) => state.chat.selectedUser);
   const users = useSelector((state) => state.chat.users);
-
-
-
 
   const fetchProfile = async () => {
     try {
@@ -76,6 +72,7 @@ const LeftSideBar = ({}) => {
     try {
       setUsersListLoading(true);
       const { data } = await axiosInstance.get("/auth/getUsers");
+      // console.log("Data: ",data);
       const { data: users } = data;
       dispatch(setUsers(users));
     } catch (err) {
@@ -123,7 +120,11 @@ const LeftSideBar = ({}) => {
                       <ChatListItem
                         key={user.email}
                         user={user}
-                        className={`${selectedUser?.email === user?.email ? "bg-muted" : null}`}
+                        className={`${
+                          selectedUser?.email === user?.email
+                            ? "bg-muted"
+                            : null
+                        }`}
                       ></ChatListItem>
                     ))}
                   <ScrollBar />

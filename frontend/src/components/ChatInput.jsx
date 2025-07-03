@@ -2,26 +2,51 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SendHorizonal } from "lucide-react";
+import socket from "@/utils/Socket";
+import { useDispatch, useSelector } from "react-redux";
+import { addMessage, updateLastMessage } from "@/redux/slices/chat.slice";
 
-const ChatInput = ({ onSend }) => {
+const ChatInput = ({handleTyping = () => {}}) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
+  const dispatch = useDispatch();
+  const selectedUser = useSelector((state) => state.chat.selectedUser);
+  const user = useSelector(state => state.user.user);
+
+  useEffect(() => {
+    socket.on("receive_message", (payload) => {
+      console.log("Message Received: ")
+      dispatch(addMessage({ message: payload, myId:user?._id })); 
+      dispatch(
+      updateLastMessage({ content: payload.message.content.trim(), timestamp: new Date().toISOString(),type:"text",senderId:payload.message.from,id:payload.message.to})
+    );
+    });
+
+    socket.on("message_sent", (payload) => {
+      dispatch(addMessage({ message: payload, myId:user?._id }));
+    });
+
+    return () => {
+      socket.off("receive_message");
+      socket.off("message_sent");
+    };
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    sendMessage();
-  };
-
-  const sendMessage = () => {
-    if (!message.trim()) return;
-    onSend(message.trim());
+    socket.emit("send_message", {
+      to: selectedUser?._id,
+      content: message.trim(),
+    });
+    dispatch(
+      updateLastMessage({ content: message.trim(), timestamp: new Date().toISOString(),type:"text",senderId:user?._id,id:selectedUser._id})
+    );
     setMessage("");
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+      handleSubmit(e);
     }
   };
 
@@ -45,7 +70,7 @@ const ChatInput = ({ onSend }) => {
         <Textarea
           ref={textareaRef}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {setMessage(e.target.value);handleTyping()}}
           onKeyDown={handleKeyDown}
           className="resize-none border rounded-xl min-h-[100px] max-h-36 py-3"
           placeholder="Type a message..."

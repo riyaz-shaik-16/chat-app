@@ -1,18 +1,11 @@
 import { LeftSideBar, ChatContainer } from "../components";
 import socket from "@/utils/Socket";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-
-// import {Button} from "../components/ui/button"
+import { useEffect } from "react";
 
 const Home = () => {
-  const { user } = useSelector((state) => state.user);
   
-
   useEffect(() => {
     socket.connect();
-    socket.emit("register", user?.email);
-
     return () => {
       socket.disconnect();
     };

@@ -1,4 +1,3 @@
-// controllers/messageController.js
 import Message from "../models/message.model.js";
 import asyncHandler from "../utils/AsyncHandler.js";
 import ApiError from "../utils/ApiError.js";
@@ -33,12 +32,20 @@ export const getMessages = asyncHandler(async (req, res) => {
     throw new ApiError(400, "otherUserId parameter is required");
   }
 
-  const messages = await Message.find({
+  const rawMessages = await Message.find({
     $or: [
       { senderId: userId, receiverId: otherUserId },
       { senderId: otherUserId, receiverId: userId },
     ],
-  }).sort({ timestamp: 1 });
+  }).sort({ timestamp: 1 }).lean();
+
+  const messages = rawMessages.map((msg) => ({
+  _id: msg._id,
+  from: msg.senderId,
+  to: msg.receiverId,
+  content: msg.content,
+  timestamp: msg.timestamp,
+}));
 
   return res
     .status(200)

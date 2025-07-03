@@ -3,54 +3,68 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import ChatBubble from "./ChatBubble";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import axiosInstance from "@/utils/axiosInstance";
+import { setConversation } from "@/redux/slices/chat.slice";
+import socket from "@/utils/Socket";
 
-const ChatContainer = ({className = "" }) => {
+const ChatContainer = ({ className = "" }) => {
   const chatRef = useRef(null);
   const selectedUser = useSelector((state) => state.chat.selectedUser);
-  const rawMessages = useSelector((state) => state.chat.conversations?.[selectedUser]);
-  const messages = rawMessages || []
+  const rawMessages = useSelector(
+    (state) => state.chat.conversations?.[selectedUser?._id]
+  );
+  const messages = rawMessages || [];
+  const user = useSelector(state => state.user.user);
 
-  const [message, setMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
+  const dispatch = useDispatch();
 
-  const handleSend = () => {}
+  const typingTimeoutRef = useRef(null);
 
-  // const messages = [
-  //   { user: "You", content: "Hey, are you coming to the meeting?" },
-  //   { user: "no", content: "Give me 5 mins, wrapping up another call." },
-  //   { user: "You", content: "Alright, I'll wait. Don't be too late though." },
-  //   {
-  //     user: "no",
-  //     content:
-  //       "Yeah yeah, I won't. Just need to send a quick report. Also, did you check the bug on login?",
-  //   },
-  //   {
-  //     user: "You",
-  //     content: "Oh right, I saw it. Looks like a token expiry issue.",
-  //   },
-  //   {
-  //     user: "no",
-  //     content:
-  //       "Exactly. I think the refresh logic isn't triggering. Might be something with the interceptor.",
-  //   },
-  //   {
-  //     user: "You",
-  //     content:
-  //       "We should probably log the response object and check if the 401 is actually caught.",
-  //   },
-  //   {
-  //     user: "no",
-  //     content:
-  //       "Yep, doing that now. Btw, should we roll back to the old auth flow temporarily?",
-  //   },
-  //   {
-  //     user: "You",
-  //     content: "Nah, let's patch it. Rollback might break mobile clients.",
-  //   },
-  //   { user: "no", content: "Alright then. On it. Meet you in 3." },
-  //   { user: "You", content: "Cool. Bring coffee." },
-  // ];
+  const handleTyping = () => {
+    console.log("This trigerreddd!!!");
+    socket.emit("typing", { to: selectedUser._id });
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit("stop_typing", { to: selectedUser._id });
+    }, 2000);
+  };
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const { data } = await axiosInstance(
+        `/messages/get-messages/${selectedUser?._id}`
+      );
+      console.log("Response of fetch messages: ", data.data);
+      dispatch(
+        setConversation({ userId: selectedUser?._id, messages: data.data })
+      );
+    };
+
+    if (selectedUser) {
+      socket.emit("mark_seen", {
+        conversationId: selectedUser?.conversationId,
+      });
+    }
+
+    socket.on("typing", ({ from }) => {
+      if (from === user?._id) setIsTyping(true);
+    });
+
+    socket.on("stop_typing", ({ from }) => {
+      if (from === user_id) setIsTyping(false);
+    });
+    selectedUser && fetchMessages();
+
+    return () => {
+      socket.off("typing");
+      socket.off("stop_typing");
+    };
+  }, [selectedUser]);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -75,10 +89,11 @@ const ChatContainer = ({className = "" }) => {
               {messages.map((msg, i) => (
                 <ChatBubble key={i} message={msg} />
               ))}
+              {isTyping && <p>Typing..</p>}
             </div>
           </ScrollArea>
 
-          <ChatInput onSend={handleSend} />
+          <ChatInput onTyping={handleTyping} />
         </div>
       ) : (
         <>

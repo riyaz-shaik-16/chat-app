@@ -1,7 +1,8 @@
 import User from "../models/user.model.js";
-import asyncHandler from "../utils/asyncHandler.js";
+import asyncHandler from "../utils/AsyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import Conversation from "../models/conversation.model.js";
 
 export const loginSuccess = asyncHandler(async (req, res, next) => {
   const user = {
@@ -20,7 +21,6 @@ export const loginSuccess = asyncHandler(async (req, res, next) => {
     { upsert: true, new: true }
   );
 
-  // console.log("saved user: ",savedUser)
   if (!savedUser) {
     throw new ApiError(500, "Failed to save user");
   }
@@ -57,9 +57,46 @@ export const logout = (req, res) => {
 };
 
 export const getAllUsers = asyncHandler(async (req, res) => {
-  // console.log(req.user._id);
-  const users = await User.find({ _id: { $ne: req.user?._id } });
+  const currentUserId = req.user._id;
+
+  const users = await User.find({ _id: { $ne: currentUserId } }).lean();
+
+  const conversations = await Conversation.find({
+    participants: currentUserId,
+  }).lean();
+
+  const conversationMap = {};
+  for (const convo of conversations) {
+    const otherUserId = convo.participants.find(
+      (id) => id.toString() !== currentUserId.toString()
+    );
+
+    if (otherUserId) {
+      conversationMap[otherUserId.toString()] = {
+        lastMessage: convo.lastMessage || null,
+        unreadCount: convo.unreadCounts?.[currentUserId.toString()] || 0,
+        _id: convo._id,
+      };
+    }
+  }
+
+  const usersWithMeta = users.map((user) => {
+    const convo = conversationMap[user._id.toString()] || {};
+    return {
+      ...user,
+      lastMessage: convo.lastMessage || null,
+      unreadCount: convo.unreadCount || 0,
+      conversationId: convo._id || null,
+    };
+  });
+
   return res
     .status(200)
-    .json(new ApiResponse(200, users, "Users Fetched Successfully!"));
+    .json(
+      new ApiResponse(
+        200,
+        usersWithMeta,
+        "Users with lastMessage and unreadCount"
+      )
+    );
 });

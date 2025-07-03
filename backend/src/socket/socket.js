@@ -1,115 +1,116 @@
 import redisClient from "../config/redisClient.js";
 import { sendMessageService } from "../services/message.service.js";
+import jwt from "jsonwebtoken";
+import cookie from "cookie";
+import Conversation from "../models/conversation.model.js";
 
 const init = (io) => {
+  io.use((socket, next) => {
+    try {
+      const cookies = socket.handshake.headers.cookie;
+      if (!cookies) return next(new Error("No cookies found"));
+
+      const parsedCookies = cookie.parse(cookies);
+      const token = parsedCookies.token;
+      if (!token) return next(new Error("Token not found"));
+
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+      socket.userId = payload.id;
+
+      next();
+    } catch (err) {
+      console.error("Socket auth error:", err.message);
+      next(new Error("Authentication failed"));
+    }
+  });
+
   io.on("connection", async (socket) => {
-    const getQueueKey = (username) => `unseenMessages:${username}`;
+    const getQueueKey = (userId) => `unseenMessages:${userId}`;
 
     const broadcastOnlineUsers = async () => {
       const users = await redisClient.hKeys("online_users");
       io.emit("online_users_list", users);
     };
 
-    console.log("User connected:", socket.id);
+    console.log("✅ User connected:", socket.id, "UserId:", socket.userId);
 
-    socket.on("register", async (userName) => {
-      try {
-        socket.username = userName;
+    socket.join(socket.userId);
 
-        socket.join(userName);
+    await redisClient.hSet("online_users", socket.userId, socket.id);
 
-        const isAlreadyOnline = await redisClient.hExists(
-          "online_users",
-          userName
-        );
-        if (!isAlreadyOnline) {
-          await redisClient.hSet("online_users", userName, "true");
-          console.log(`${userName} registered and joined room ${userName}`);
-        } else {
-          console.log(`${userName} is already online`);
-        }
+    const queuedMessages = await redisClient.lRange(
+      getQueueKey(socket.userId),
+      0,
+      -1
+    );
+    if (queuedMessages.length > 0) {
+      queuedMessages.forEach((msg) => {
+        socket.emit("receive_message", JSON.parse(msg));
+      });
+      await redisClient.del(getQueueKey(socket.userId));
+    }
 
-        const queuedMessages = await redisClient.lRange(
-          getQueueKey(userName),
-          0,
-          -1
-        );
-        if (queuedMessages.length > 0) {
-          queuedMessages.forEach((msg) => {
-            socket.emit("receive_message", JSON.parse(msg));
-          });
-          await redisClient.del(getQueueKey(userName));
-        }
-
-        await broadcastOnlineUsers();
-      } catch (err) {
-        console.error("Error in register:", err.message);
-      }
-    });
+    await broadcastOnlineUsers();
 
     socket.on("send_message", async ({ to, content }) => {
       try {
-        const from = socket.username;
-
+        const from = socket.userId;
         const { status, payload } = await sendMessageService({
           from,
           to,
           content,
         });
 
-        if (status === "online") {
-          io.to(to).emit("receive_message", payload);
+        const targetSocketId = await redisClient.hGet("online_users", to);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("receive_message", payload);
         }
+
         socket.emit("message_sent", payload);
       } catch (err) {
-        console.error("Private message error:", err.message);
+        console.error("Message send error:", err.message);
         socket.emit("message_error", { error: err.message });
       }
     });
 
-    socket.on("typing", async ({ to }) => {
+    socket.on("mark_seen", async ({ conversationId }) => {
+      const userId = socket.userId;
       try {
-        io.to(to).emit("typing", { from: socket.username });
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation) return;
+
+        conversation.unreadCounts.set(userId, 0);
+        await conversation.save();
       } catch (err) {
-        console.error("Error in typing:", err.message);
+        console.error("Error marking seen:", err);
       }
     });
 
-    socket.on("stop_typing", async ({ to }) => {
-      try {
-        io.to(to).emit("stop_typing", { from: socket.username });
-      } catch (err) {
-        console.error("Error in stop_typing:", err.message);
-      }
+    socket.on("typing", ({ to }) => {
+      console.log("Typing trigerred!!!");
+      io.to(to).emit("typing", { from: socket.userId });
     });
 
+    socket.on("stop_typing", ({ to }) => {
+      console.log("Typing stopped!!");
+      io.to(to).emit("stop_typing", { from: socket.userId });
+    });
+
+    // ✅ Manual logout
     socket.on("manual_logout", async () => {
-      try {
-        if (socket.username) {
-          await redisClient.hDel("online_users", socket.username);
-          socket.leave(socket.username);
-          console.log(`${socket.username} manually logged out`);
-          await broadcastOnlineUsers();
-        }
-      } catch (err) {
-        console.error("Error in manual_logout:", err.message);
-      }
+      await redisClient.hDel("online_users", socket.userId);
+      socket.leave(socket.userId);
+      console.log(`${socket.userId} manually logged out`);
+      await broadcastOnlineUsers();
     });
 
+    // ✅ Disconnect
     socket.on("disconnect", async () => {
-      try {
-        if (socket.username) {
-          await redisClient.hDel("online_users", socket.username);
-          socket.leave(socket.username);
-          console.log(`${socket.username} disconnected`);
-          await broadcastOnlineUsers();
-        }
-      } catch (err) {
-        console.error("Error in disconnect:", err.message);
-      }
+      await redisClient.hDel("online_users", socket.userId);
+      socket.leave(socket.userId);
+      console.log(`${socket.userId} disconnected`);
+      await broadcastOnlineUsers();
     });
-
-    await broadcastOnlineUsers();
   });
 };
 

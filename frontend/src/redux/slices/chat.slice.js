@@ -1,3 +1,4 @@
+import axiosInstance from "@/utils/axiosInstance";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -5,7 +6,6 @@ const initialState = {
   onlineUsers: [],
   selectedUser: null,
   conversations: {},
-  unreadCounts: {},
 };
 
 const chatSlice = createSlice({
@@ -13,18 +13,16 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     addMessage: (state, action) => {
-      const { userId, message } = action.payload;
+      const { message, myId } = action.payload;
+      const { from, to } = message;
+      const otherUserId = from === myId ? to : from;
 
-      if (!state.conversations[userId]) {
-        state.conversations[userId] = [];
+      if (!state.conversations[otherUserId]) {
+        state.conversations[otherUserId] = [];
       }
-      state.conversations[userId].push(message);
 
-      if (state.selectedUser !== userId && message.from === userId) {
-        state.unreadCounts[userId] = (state.unreadCounts[userId] || 0) + 1;
-      }
+      state.conversations[otherUserId].push(message);
     },
-
     setConversation: (state, action) => {
       const { userId, messages } = action.payload;
       state.conversations[userId] = messages;
@@ -32,7 +30,35 @@ const chatSlice = createSlice({
 
     selectUser: (state, action) => {
       state.selectedUser = action.payload;
-      state.unreadCounts[action.payload] = 0;
+    },
+
+    updateUnreadCount: (state, action) => {
+      const user = state.users.find((u) => u._id === action.payload);
+      console.log("useR: ", user);
+      console.log("Matched: ", user._id === action.payload);
+      state.users = state.users.map((user) =>
+        String(user._id) === String(action.payload)
+          ? { ...user, unreadCount: 0 }
+          : user
+      );
+    },
+
+    updateLastMessage: (state, action) => {
+      const message = action.payload;
+      console.log("this one triggered!: ",message);
+      state.users = state.users.map((user) =>
+        String(user._id) === String(message.id)
+          ? {
+              ...user,
+              lastMessage: {
+                content: message.content,
+                type: message.type,
+                senderId: message.senderId,
+                timestamp: message.timestamp,
+              },
+            }
+          : user
+      );
     },
 
     setUsers: (state, action) => {
@@ -51,6 +77,8 @@ export const {
   selectUser,
   setUsers,
   setOnlineUsers,
+  updateUnreadCount,
+  updateLastMessage,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

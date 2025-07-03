@@ -20,14 +20,14 @@ const ChatHeader = ({ user }) => {
             <AvatarImage src={user?.picture} alt={user?.fullName} />
             <AvatarFallback>{user?.fullName?.[0] ?? "U"}</AvatarFallback>
           </Avatar>
-          {onlineUsers.includes(user?.email) && (
+          {onlineUsers.includes(user?._id) && (
             <Badge className="absolute bottom-0 right-0 h-3 w-3 p-0 rounded-full bg-green-500 border-2 border-background" />
           )}
         </div>
         <div className="flex flex-col">
           <span className="text-sm font-medium">{user?.fullName}</span>
           <span className="text-xs text-muted-foreground">
-            {onlineUsers.includes(user?.email) ? "Online" : "Offline"}
+            {onlineUsers.includes(user?._id) ? "Online" : "Offline"}
           </span>
         </div>
       </div>
