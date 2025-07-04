@@ -6,6 +6,8 @@ const initialState = {
   onlineUsers: [],
   selectedUser: null,
   conversations: {},
+  lastMessages:[],
+  unreadCounts:[]
 };
 
 const chatSlice = createSlice({
@@ -46,6 +48,7 @@ const chatSlice = createSlice({
     updateLastMessage: (state, action) => {
       const message = action.payload;
       console.log("this one triggered!: ",message);
+      console.log("This guy's last message gonna change: ",message.id);
       state.users = state.users.map((user) =>
         String(user._id) === String(message.id)
           ? {

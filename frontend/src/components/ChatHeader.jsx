@@ -8,10 +8,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
-import { useSelector } from "react-redux";
 
 const ChatHeader = ({ user }) => {
-  const onlineUsers = useSelector((state) => state.chat.onlineUsers);
   return (
     <div className="w-full fixed top-0 z-1 flex items-center justify-between border-b px-4 py-3 bg-background">
       <div className="flex items-center gap-4">

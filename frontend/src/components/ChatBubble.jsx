@@ -2,7 +2,6 @@ import { Card, CardFooter, CardContent } from "./ui/card";
 import { useSelector } from "react-redux";
 
 const ChatBubble = ({ message }) => {
-
   const selectedUser = useSelector((state) => state.chat.selectedUser);
 
   return (

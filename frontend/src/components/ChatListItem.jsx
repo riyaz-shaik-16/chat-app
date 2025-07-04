@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SidebarMenuItem } from "./ui/sidebar";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
@@ -6,8 +6,6 @@ import { Badge } from "./ui/badge";
 import { selectUser } from "@/redux/slices/chat.slice";
 
 const ChatListItem = ({ user, className = "" }) => {
-  const onlineUsers = useSelector((state) => state.chat.onlineUsers);
-  const dispatch = useDispatch();
   return (
     <SidebarMenuItem
       key={user?.email}

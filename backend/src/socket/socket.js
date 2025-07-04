@@ -52,7 +52,7 @@ const init = (io) => {
 
     await broadcastOnlineUsers();
 
-    socket.on("send_message", async ({ to, content }) => {
+    socket.on("send_message", async ({ to, content, selectedUser }) => {
       try {
         const from = socket.userId;
         const { status, payload } = await sendMessageService({
@@ -65,6 +65,7 @@ const init = (io) => {
         if (targetSocketId) {
           io.to(targetSocketId).emit("receive_message", payload);
         }
+        socket.emit("update_last_message",{to,content})
 
         socket.emit("message_sent", payload);
       } catch (err) {

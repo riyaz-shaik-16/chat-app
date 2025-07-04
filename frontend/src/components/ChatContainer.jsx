@@ -1,70 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useEffect, useRef } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatBubble from "./ChatBubble";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
-import { useSelector, useDispatch } from "react-redux";
-import axiosInstance from "@/utils/axiosInstance";
-import { setConversation } from "@/redux/slices/chat.slice";
-import socket from "@/utils/Socket";
+import { useSelector } from "react-redux";
 
 const ChatContainer = ({ className = "" }) => {
   const chatRef = useRef(null);
-  const selectedUser = useSelector((state) => state.chat.selectedUser);
-  const rawMessages = useSelector(
-    (state) => state.chat.conversations?.[selectedUser?._id]
-  );
-  const messages = rawMessages || [];
-  const user = useSelector(state => state.user.user);
-
-  const [isTyping, setIsTyping] = useState(false);
-
-  const dispatch = useDispatch();
-
-  const typingTimeoutRef = useRef(null);
-
-  const handleTyping = () => {
-    console.log("This trigerreddd!!!");
-    socket.emit("typing", { to: selectedUser._id });
-
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-    typingTimeoutRef.current = setTimeout(() => {
-      socket.emit("stop_typing", { to: selectedUser._id });
-    }, 2000);
-  };
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const { data } = await axiosInstance(
-        `/messages/get-messages/${selectedUser?._id}`
-      );
-      console.log("Response of fetch messages: ", data.data);
-      dispatch(
-        setConversation({ userId: selectedUser?._id, messages: data.data })
-      );
-    };
-
-    if (selectedUser) {
-      socket.emit("mark_seen", {
-        conversationId: selectedUser?.conversationId,
-      });
-    }
-
-    socket.on("typing", ({ from }) => {
-      if (from === user?._id) setIsTyping(true);
-    });
-
-    socket.on("stop_typing", ({ from }) => {
-      if (from === user_id) setIsTyping(false);
-    });
-    selectedUser && fetchMessages();
-
-    return () => {
-      socket.off("typing");
-      socket.off("stop_typing");
-    };
-  }, [selectedUser]);
+  const user = useSelector((state) => state.user.user);
 
   useEffect(() => {
     if (chatRef.current) {
