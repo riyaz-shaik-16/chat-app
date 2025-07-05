@@ -1,13 +1,14 @@
+import { selectSelectedChat } from "@/redux/slices/chat.slice";
 import { Card, CardFooter, CardContent } from "./ui/card";
 import { useSelector } from "react-redux";
 
 const ChatBubble = ({ message }) => {
-  const selectedUser = useSelector((state) => state.chat.selectedUser);
+  const selectedUser = useSelector(selectSelectedChat);
 
   return (
     <Card
       className={`w-fit h-fit mt-3 mb-3 max-w-[75%] ${
-        message.from !== selectedUser._id
+        message.senderId._id !== selectedUser._id
           ? "ml-auto bg-primary-foreground text-dark"
           : "bg-muted"
       }`}
@@ -18,7 +19,7 @@ const ChatBubble = ({ message }) => {
       <CardFooter>
         <p
           className={`text-[10px] ${
-            message.from !== selectedUser._id ? "text-left" : "text-right"
+            message.senderId._id !== selectedUser._id ? "text-left" : "text-right"
           }`}
         >
           {new Date().toLocaleTimeString([], {

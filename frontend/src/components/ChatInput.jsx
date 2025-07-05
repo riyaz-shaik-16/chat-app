@@ -2,11 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SendHorizonal } from "lucide-react";
+import { useSelector } from "react-redux";
+import { selectUserInfo } from "@/redux/slices/user.slice";
 
 const ChatInput = ({ handleTyping = () => {} }) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector(selectUserInfo);
 
   
 

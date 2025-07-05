@@ -1,87 +1,90 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
-import { createSlice } from "@reduxjs/toolkit";
+
+export const fetchChatUsers = createAsyncThunk(
+  "chat/fetchChatUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/chat/users");
+      console.log("Fetched users for sidebr response: ",res.data.data.users);
+      return res.data.data.users; 
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to fetch sidebar users");
+    }
+  }
+);
 
 const initialState = {
-  users: [],
-  onlineUsers: [],
-  selectedUser: null,
-  conversations: {},
-  lastMessages:[],
-  unreadCounts:[]
+  chatUsers: [],         
+  selectedChat: null,    
+  loading: false,        
+  error: null,           
 };
+
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    addMessage: (state, action) => {
-      const { message, myId } = action.payload;
-      const { from, to } = message;
-      const otherUserId = from === myId ? to : from;
-
-      if (!state.conversations[otherUserId]) {
-        state.conversations[otherUserId] = [];
+    setSelectedChat(state, action) {
+      state.selectedChat = action.payload;
+    },
+    clearSelectedChat(state) {
+      state.selectedChat = null;
+    },
+    updateLastMessage(state, action) {
+      const { id, content, timestamp, sender, type = "text" } = action.payload;
+      const user = state.chatUsers.find((u) => u._id === id);
+      if (user) {
+        user.lastMessage = { content, timestamp, sender, type };
       }
-
-      state.conversations[otherUserId].push(message);
     },
-    setConversation: (state, action) => {
-      const { userId, messages } = action.payload;
-      state.conversations[userId] = messages;
+    incrementUnread(state, action) {
+      const id = action.payload;
+      const user = state.chatUsers.find((u) => u._id === id);
+      if (user) {
+        user.unreadCount = (user.unreadCount || 0) + 1;
+      }
     },
-
-    selectUser: (state, action) => {
-      state.selectedUser = action.payload;
+    resetUnread(state, action) {
+      const id = action.payload;
+      const user = state.chatUsers.find((u) => u._id === id);
+      if (user) {
+        user.unreadCount = 0;
+      }
     },
-
-    updateUnreadCount: (state, action) => {
-      const user = state.users.find((u) => u._id === action.payload);
-      console.log("useR: ", user);
-      console.log("Matched: ", user._id === action.payload);
-      state.users = state.users.map((user) =>
-        String(user._id) === String(action.payload)
-          ? { ...user, unreadCount: 0 }
-          : user
-      );
-    },
-
-    updateLastMessage: (state, action) => {
-      const message = action.payload;
-      console.log("this one triggered!: ",message);
-      console.log("This guy's last message gonna change: ",message.id);
-      state.users = state.users.map((user) =>
-        String(user._id) === String(message.id)
-          ? {
-              ...user,
-              lastMessage: {
-                content: message.content,
-                type: message.type,
-                senderId: message.senderId,
-                timestamp: message.timestamp,
-              },
-            }
-          : user
-      );
-    },
-
-    setUsers: (state, action) => {
-      state.users = action.payload;
-    },
-
-    setOnlineUsers: (state, action) => {
-      state.onlineUsers = action.payload;
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchChatUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchChatUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.chatUsers = action.payload;
+      })
+      .addCase(fetchChatUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   },
 });
 
+
 export const {
-  addMessage,
-  setConversation,
-  selectUser,
-  setUsers,
-  setOnlineUsers,
-  updateUnreadCount,
+  setSelectedChat,
+  clearSelectedChat,
   updateLastMessage,
+  incrementUnread,
+  resetUnread,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
+
+
+
+export const selectChatUsers = (state) => state.chat.chatUsers;
+export const selectSelectedChat = (state) => state.chat.selectedChat;
+export const selectSidebarLoading = (state) => state.chat.loading;
+export const selectSidebarError = (state) => state.chat.error;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarHeader,
@@ -31,21 +31,36 @@ import { Moon, Sun } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useTheme } from "@/components/theme-provider";
 import ProfileDialog from "./ProfileDialog";
-import {  useSelector } from "react-redux";
 import Logout from "./Logout";
 import ChatListItem from "./ChatListItem";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchChatUsers,
+  selectChatUsers,
+  selectSidebarLoading,
+} from "@/redux/slices/chat.slice";
+import { selectSelectedChat } from "@/redux/slices/chat.slice";
+import { selectUserInfo } from "@/redux/slices/user.slice";
 
 const LeftSideBar = ({}) => {
   const { setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
 
+  const chatUsers = useSelector(selectChatUsers);
+  const loading = useSelector(selectSidebarLoading);
+  const selectedUser = useSelector(selectSelectedChat);
+  const user = useSelector(selectUserInfo)
 
-  const user = useSelector((state) => state.user?.user);
+  useEffect(() => {
+    dispatch(fetchChatUsers());
+  }, [dispatch]);
+
+  if(loading) return <h1>Loadingg...</h1>
 
   return (
     <SidebarProvider>
       <SidebarTrigger />
-
       <Sidebar>
         <SidebarHeader>
           <Input placeholder="Search chats..." className="rounded-md" />
@@ -57,13 +72,13 @@ const LeftSideBar = ({}) => {
             <SidebarGroupContent>
               <SidebarMenu>
                 <ScrollArea className="h-[calc(100vh-160px)] pr-3">
-                  {users.length > 0 &&
-                    users?.map((user) => (
+                  {chatUsers.length > 0 &&
+                    chatUsers?.map((user) => (
                       <ChatListItem
-                        key={user.email}
+                        key={user._id}
                         user={user}
                         className={`${
-                          selectedUser?.email === user?.email
+                          selectedUser?._id === user?._id
                             ? "bg-muted"
                             : null
                         }`}

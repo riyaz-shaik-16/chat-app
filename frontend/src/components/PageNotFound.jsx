@@ -11,7 +11,7 @@ const PageNotFound = () => {
       <p className="text-muted-foreground text-center max-w-md mb-6">
         Oops! The page you're looking for doesn't exist or has been moved.
       </p>
-      <Button onClick={() => navigate("/")} variant="default">
+      <Button onClick={() => navigate("/chat")} variant="default">
         Go Home
       </Button>
     </div>

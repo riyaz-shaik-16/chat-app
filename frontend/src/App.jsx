@@ -7,7 +7,7 @@ import SetPassword from "./components/SetPassword";
 const App = () => {
   return (
     <BrowserRouter>
-      <Toaster position="top-center" richColors />
+      <Toaster position="top-center"/>
       <Routes>
         <Route element={<PublicRoute redirectTo="/profile" />}>
           <Route path="/login" element={<Login />} />
@@ -15,9 +15,9 @@ const App = () => {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
-          <Route path="/" element={<Home />} />
+          <Route path="/chat" index element={<Home />} />
         </Route>
-        {/* <Route path="/auth-success" element={<AuthSuccess />} /> */}
+        
         <Route path="/set-password" element={<SetPassword />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>

@@ -4,7 +4,7 @@ import verifyJWT from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/send-message", verifyJWT, sendMessage);
-router.get("/get-messages/:otherUserId", verifyJWT, getMessages);
+router.post("/send-message", sendMessage);
+router.get("/get-messages/:id", verifyJWT, getMessages);
 
 export default router;

@@ -45,18 +45,6 @@ const conversationSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-
-    archivedBy: {
-      type: Map,
-      of: Boolean,
-      default: new Map(),
-    },
-
-    pinnedBy: {
-      type: Map,
-      of: Boolean,
-      default: new Map(),
-    },
   },
   {
     timestamps: true,
@@ -108,6 +96,20 @@ conversationSchema.statics.findByParticipant = function (userId) {
     isActive: true,
   }).sort({ "lastMessage.timestamp": -1 });
 };
+
+conversationSchema.statics.findByParticipant = function (userId) {
+  return this.find({
+    participants: userId,
+    isActive: true,
+  })
+    .sort({ "lastMessage.timestamp": -1 })
+    .populate({
+      path: "lastMessage.senderId",
+      select: "fullName picture",
+    })
+    .lean();
+};
+
 
 //find direct convo between two users
 conversationSchema.statics.findDirectConversation = function (

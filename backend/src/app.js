@@ -13,6 +13,7 @@ import errorHandler from "./middlewares/errorHandler.js";
 
 
 import authRoutes from "./routes/auth.route.js";
+import chatRouter from "./routes/chat.route.js"
 import messageRoutes from "./routes/message.route.js"
 
 dotenv.config();
@@ -28,7 +29,12 @@ app.use(express.json());
 app.use(cookieParser())
 app.use(passport.initialize());
 
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
 app.use("/api/auth", authRoutes);
+app.use("/api/chat",chatRouter)
 app.use("/api/messages",messageRoutes);
 
 const server = createServer(app);
@@ -43,9 +49,7 @@ const io = new Server(server, {
 
 init(io);
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+
 
 const startServer = async () => {
   try {

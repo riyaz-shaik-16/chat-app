@@ -1,86 +1,40 @@
 import Message from "../models/message.model.js";
 import Conversation from "../models/conversation.model.js";
-import redisClient from "../config/redisClient.js";
-import mongoose from "mongoose";
+import ApiError from "../utils/ApiError.js";
 
 export const sendMessageService = async ({
   from,
   to,
   content,
   type = "text",
+  selectedUser = null,
 }) => {
   if (!from || !to || !content?.trim()) {
-    throw new Error("Invalid message payload");
+    throw new ApiError(400, "Missing required fields");
   }
 
-  const participants = [from, to]
-    .map((id) => new mongoose.Types.ObjectId(id))
-    .sort();
+  let conversation = await Conversation.findDirectConversation(from, to);
+  if (!conversation) {
+    conversation = await Conversation.createDirectConversation(from, to);
+  }
 
-  console.log("Participants: ", participants[0], " - ", participants[1]);
-
-  const conversation = await Conversation.findOneAndUpdate(
-    {
-      participants: {
-        $all: [
-          { $elemMatch: { $eq: participants[0] } },
-          { $elemMatch: { $eq: participants[1] } },
-        ],
-      },
-    },
-    {
-      $setOnInsert: {
-        participants: participants, // ✅ explicitly set participants to avoid Mongo error
-        unreadCounts: {
-          [to]: 0,
-          [from]: 0,
-        },
-        lastMessage: {}, // optional init, safe default
-      },
-    },
-    { new: true, upsert: true }
-  );
-
-  const savedMessage = await Message.create({
+  const message = await Message.create({
+    conversationId: conversation._id,
     senderId: from,
     receiverId: to,
-    content,
+    content: content.trim(),
     type,
-    status: "sent",
-    conversationId: conversation._id,
   });
 
-  conversation.lastMessage = {
-    content,
+  await conversation.updateLastMessage({
+    content: message.content,
     senderId: from,
-    type,
-    timestamp: savedMessage.createdAt,
-  };
+    type: message.type,
+  });
 
-  // Increase unread count for the receiver
-  conversation.unreadCounts.set(
-    to,
-    (conversation.unreadCounts.get(to) || 0) + 1
-  );
-
-  await conversation.save();
-
-  const payload = {
-    _id: savedMessage._id,
-    from,
-    to,
-    content,
-    type,
-    timestamp: savedMessage.createdAt,
-    status: savedMessage.status,
-  };
-
-  const isOnline = await redisClient.hExists("online_users", to);
-
-  if (isOnline) {
-    return { status: "online", payload };
-  } else {
-    await redisClient.rPush(`unseenMessages:${to}`, JSON.stringify(payload));
-    return { status: "queued", payload };
+  if (selectedUser !== to) {
+    await conversation.incrementUnreadCount(to);
   }
+
+  return message;
 };

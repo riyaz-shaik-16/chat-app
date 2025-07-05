@@ -20,7 +20,7 @@ import {
   selectAuthError,
   selectIsAuthenticated,
 } from "@/redux/slices/auth.slice";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 const formSchema = z.object({
@@ -32,13 +32,18 @@ const Login = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const authError = useSelector(selectAuthError);
   const navigate = useNavigate();
+  const location = useLocation(); // 👈 get user's previous location
+
+  const from = location.state?.from?.pathname || "/profile";
+
+  console.log("User came from:", from);
 
   useEffect(() => {
     if (isAuthenticated) {
       toast.success("Logged in successfully!");
-      navigate("/profile")
+      navigate(from,{replace:true})
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated,from,navigate]);
 
   useEffect(() => {
     if (authError) {
