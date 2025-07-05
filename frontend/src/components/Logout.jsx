@@ -1,30 +1,22 @@
 import React from "react";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
-import axiosInstance from "@/utils/axiosInstance";
 import { useDispatch } from "react-redux";
-import { logout } from "@/redux/slices/user.slice";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { performLogout } from "@/redux/thunks/auth.thunk";
 
 const Logout = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const handleLogout = async() => {
-        try {
-            console.log("logout button clicked!")
-            const response = await axiosInstance.post("/auth/logout");
-            console.log(response);
-            if(response.data.success){
-                dispatch(logout());
-                toast.success("Logged out successfully!");
-                navigate("/login")
-            }
-        } catch (error) {
-            console.log("Error in logout: ",error.message);
-            dispatch(logout());
-            navigate("/login");
-        }
+  const dispatch = useDispatch();
+  const handleLogout =  () => {
+    try {
+      dispatch(performLogout());
+      localStorage.removeItem("auth_check_cache"); 
+      toast.success("Logged out successfully!");
+      navigate("/login"); 
+    } catch (err) {
+      toast.error("Logout failed. Please try again.");
     }
+  };
   return <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>;
 };
 

@@ -24,7 +24,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(errorHandler)
+
 app.use(cookieParser())
 app.use(passport.initialize());
 
@@ -65,6 +65,8 @@ const startServer = async () => {
 };
 
 startServer();
+
+app.use(errorHandler)
 
 export default io;
 

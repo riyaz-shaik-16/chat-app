@@ -1,41 +1,24 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
-import axiosInstance from "@/utils/axiosInstance";
-import { setUser, logout } from "@/redux/slices/user.slice";
+import { selectAuthLoading, selectIsAuthenticated } from "@/redux/slices/auth.slice";
+import { selectUserLoading } from "@/redux/slices/user.slice";
+import { checkSession } from "@/redux/thunks/auth.thunk";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
 
-const PublicRoute = () => {
-  const [isAllowed, setIsAllowed] = useState(null);
+const PublicRoute = ({ redirectTo = "/dashboard" }) => {
+  
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isUserLoading = useSelector(selectUserLoading);
+  const isAuthLoading = useSelector(selectAuthLoading);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await axiosInstance.get("/auth/profile");
+  useEffect(()=>{
+    dispatch(checkSession())
+  },[])
 
-        console.log("Response in public Route: ",response);
+  if (isUserLoading || isAuthLoading) return <div>Loading...</div>;
 
-        if (response.data.success) {
-          dispatch(setUser(response.data.data));
-          setIsAllowed(false);
-          navigate("/profile");
-        } else {
-          dispatch(logout());
-          setIsAllowed(true);
-        }
-      } catch (err) {
-        dispatch(logout());
-        setIsAllowed(true);
-      }
-    };
-
-    checkAuth();
-  }, [dispatch, navigate]);
-
-  if (isAllowed === null) return <h1>Loading...</h1>;
-
-  return isAllowed ? <Outlet /> : null;
+  return isAuthenticated ? <Navigate to={redirectTo} replace /> : <Outlet />;
 };
 
 export default PublicRoute;

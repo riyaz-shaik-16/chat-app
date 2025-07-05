@@ -8,34 +8,30 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
   const token =
     req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
-  // console.log("token:", token);
-
   if (!token) {
     throw new ApiError(401, "Unauthorized request");
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  // console.log("Decoded:", decoded);
 
-  const redisUser = await redisClient.get(`user:${decoded.id}`);
-  // console.log("Redis user: ",redisUser);
+  const redisUser = await redisClient.get(`user:${decoded.email}`);
+
   if (redisUser) {
-    req.user = JSON.parse(redisUser); 
+    req.user = JSON.parse(redisUser);
     return next();
   }
 
-  const user = await User.findById(decoded.id);
-  // console.log("User from MongoDB:", user);
+  const user = await User.findOne({ email: decoded.email }).select(
+    "-password -__v -googleId"
+  );
 
   if (!user) {
     throw new ApiError(401, "Invalid access token");
   }
 
-  await redisClient.set(
-    `user:${decoded.id}`,
-    JSON.stringify(user),
-    { EX: 60 * 5 }
-  );
+  await redisClient.set(`user:${decoded.email}`, JSON.stringify(user), {
+    EX: 60 * 5,
+  });
 
   req.user = user;
   return next();
