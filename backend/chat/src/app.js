@@ -18,8 +18,8 @@ app.use(cookieParser());
 // app.use(cors());
 const port = process.env.PORT || 5002;
 
-app.use("/api/v1/chat",chatRoutes);
-app.use("/api/v1/message",messageRoutes)
+app.use("/api/chat",chatRoutes);
+app.use("/api/message",messageRoutes)
 
 ;(async () => {
     try {

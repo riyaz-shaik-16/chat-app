@@ -1,6 +1,7 @@
 import Chat from "../models/chat.model.js";
 import Message from "../models/message.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import axios from "axios";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -111,6 +112,107 @@ export const sendMessage = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in send message: ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error!",
+    });
+  }
+};
+
+export const getMessages = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const chatId  = req.params?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid userId",
+      });
+    }
+
+    if (!chatId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid chatId",
+      });
+    }
+
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "No chat found for given chatId",
+      });
+    }
+
+    const isUserInChat = chat.users.some(
+      (user) => user.toString() === userId.toString()
+    );
+
+    if (!isUserInChat) {
+      return res.status(403).json({
+        success: false,
+        message: "User is not in Chat!",
+      });
+    }
+
+    const markMessagesSeen = await Message.find({
+      chatId,
+      sender: { $ne: userId },
+      seen: false,
+    });
+
+    await Message.updateMany(
+      {
+        chatId,
+        sender: { $ne: userId },
+        seen: false,
+      },
+      {
+        seen: true,
+        seenAt: new Date(),
+      }
+    );
+
+    const messages = await Message.find({ chatId }).sort({ createdAt: 1 });
+
+    const otherUserId = chat.users.find(
+      (user) => user.toString() !== userId.toString()
+    );
+
+    if (!otherUserId) {
+      return res.status(400).json({
+        success: false,
+        message: "No other user found!",
+      });
+    }
+
+    try {
+      const { data } = await axios.get(
+        `${process.env.USERSERVICE_URL}/api/user/get-user/${otherUserId}`
+      );
+
+      //socket work
+
+      return res.status(200).json({
+        success: true,
+        message: "Messages fetched successfully!",
+        user: data.user,
+        messages,
+      });
+    } catch (error) {
+      console.log("Error finding user data in get messages: ", error);
+      return res.status(404).json({
+        success: false,
+        message:"Error fetching user!",
+        messages,
+        user: { _id: otherUserId, name: "Unknown user!" },
+      });
+    }
+  } catch (error) {
+    console.log("Error in getMessages: ", error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error!",
