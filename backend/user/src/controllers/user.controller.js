@@ -5,7 +5,10 @@ import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
   try {
+    console.log("REQ body: ",req?.body);
     const { email } = req.body;
+
+    
 
     if (!email)
       return res.status(400).json({
@@ -59,6 +62,8 @@ export const login = async (req, res) => {
 export const verifyUser = async (req, res) => {
   try {
     const { email, otp } = req.body;
+
+    console.log("REQ body: ",req?.body);
 
     if (!email || !otp) {
       return res.status(400).json({
@@ -174,3 +179,4 @@ export const getUser = async (req, res) => {
     });
   }
 };
+

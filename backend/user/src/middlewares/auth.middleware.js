@@ -7,6 +7,7 @@ export const verifyJwt = async (req, res, next) => {
     const token =
       req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
+      console.log("Token: ",token);
 
     if (!token) {
       return res.status(400).json({
