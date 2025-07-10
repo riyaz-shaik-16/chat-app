@@ -5,10 +5,9 @@ import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
   try {
-    console.log("REQ body: ",req?.body);
+    console.log("In login controller to send otp");
+    console.log("REQ body: ", req?.body);
     const { email } = req.body;
-
-    
 
     if (!email)
       return res.status(400).json({
@@ -63,7 +62,9 @@ export const verifyUser = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    console.log("REQ body: ",req?.body);
+    console.log("in verofy user!");
+
+    console.log("REQ body: ", req?.body);
 
     if (!email || !otp) {
       return res.status(400).json({
@@ -99,17 +100,20 @@ export const verifyUser = async (req, res) => {
       }
     );
 
+    const isProd = process.env.DEVELOPMENT_ENVIRONMENT === "PRODUCTION";
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.DEVELOPMENT_ENVIRONMENT === "PRODUCTION",
+      secure: isProd,
       maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "lax",
+      sameSite: isProd ? "none" : "lax",
     });
 
     return res.status(200).json({
       success: true,
       message: "Logged in successfully!",
       user,
+      token
     });
   } catch (error) {
     console.log("Error in login: ", error);
@@ -121,10 +125,11 @@ export const verifyUser = async (req, res) => {
 };
 
 export const getProfile = (req, res) => {
+  console.log("Req user: ",req?.user);
   return res.status(200).json({
     success: true,
     message: "Profile Fetched Successfully!",
-    user: req.user,
+    user: req?.user,
   });
 };
 
@@ -179,4 +184,3 @@ export const getUser = async (req, res) => {
     });
   }
 };
-

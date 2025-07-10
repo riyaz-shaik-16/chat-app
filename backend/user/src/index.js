@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
   origin:process.env.FRONTEND_URI,
-  withCredentials:true,
+  credentials:true,
 }))
 
 app.use("/api/user",userRoutes);

@@ -50,7 +50,7 @@ const VerifyOtp = () => {
       dispatch(fetchUserStart());
       const { data } = await axios.post(
         `http://localhost:5000/api/user/verify-user`,
-        { email, otp: form.getValues("pin") }
+        { email, otp: form.getValues("pin") },{withCredentials:true}
       );
       console.log("Data: ", data);
       if (data.success) {

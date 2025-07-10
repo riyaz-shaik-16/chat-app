@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 export const verifyJwt = async (req, res, next) => {
   try {
 
+    console.log("this hit!");
     const token =
       req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
@@ -17,6 +18,7 @@ export const verifyJwt = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded: ",decoded);
 
     const user = await User.findOne({ email: decoded.email });
 

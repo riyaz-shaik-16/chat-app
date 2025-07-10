@@ -11,61 +11,57 @@ import {
   selectUserError,
 } from "@/redux/slices/user.slice";
 
-const ProtectedRoute = () => {
+const PublicRoute = ({ redirectTo = "/dashboard" }) => {
   const dispatch = useDispatch();
   const user = useSelector(selectUserInfo);
   const loading = useSelector(selectUserLoading);
   const error = useSelector(selectUserError);
 
-  const getUser = useCallback(async () => {
-    // Don't fetch if user already exists and is valid
+  const checkAuthStatus = useCallback(async () => {
+    if (error && !user?._id) return;
     if (user?._id) return;
 
     try {
       dispatch(fetchUserStart());
       const { data } = await axios.get(
         "http://localhost:5000/api/user/get-profile",
-        { 
+        {
           withCredentials: true,
         }
       );
-      console.log("Protected route data:", data);
+      console.log("Public route - user found:", data);
       dispatch(fetchUserSuccess(data.user));
     } catch (error) {
-      console.error("Error in protected route:", error);
-      dispatch(fetchUserFailure(error.message || "Failed to fetch user"));
+      console.log(
+        "Public route - no authenticated user:",
+        error.response?.status
+      );
+      dispatch(
+        fetchUserFailure(error.message || "Failed to check auth status")
+      );
     }
-  }, [dispatch, user?._id]);
+  }, [dispatch, user?._id, error]);
 
   useEffect(() => {
-    getUser();
-  }, [getUser]);
+    checkAuthStatus();
+  }, [checkAuthStatus]);
 
-  // Handle loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Checking authentication...</p>
         </div>
       </div>
     );
   }
 
-  // Handle error state (optional - you might want to redirect to login on any error)
-  if (error && !user?._id) {
-    console.error("Authentication error:", error);
-    return <Navigate to="/login" replace state={{ error: error }} />;
-  }
-
-  // If user is authenticated, render the protected content
   if (user?._id) {
-    return <Outlet />;
+    return <Navigate to={redirectTo} replace />;
   }
 
-  // Default fallback - redirect to login
-  return <Navigate to="/login" replace />;
+  return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;
