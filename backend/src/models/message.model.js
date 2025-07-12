@@ -34,4 +34,28 @@ const messageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+messageSchema.statics.createAndPopulate = async function ({
+  conversationId,
+  senderId,
+  receiverId,
+  content,
+  type = "text",
+  status = "sent",
+}) {
+  const message = await this.create({
+    conversationId,
+    senderId,
+    receiverId,
+    content: content.trim(),
+    type,
+    status,
+  });
+
+  return this.findById(message._id)
+    .populate("senderId", "_id fullName picture")
+    .populate("receiverId", "_id fullName picture");
+};
+
 export default mongoose.model("Message", messageSchema);
+
+

@@ -51,13 +51,11 @@ const conversationSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
 conversationSchema.index({ participants: 1 });
 conversationSchema.index({ "lastMessage.timestamp": -1 });
 conversationSchema.index({ isActive: 1 });
 
 
-//to update last message
 conversationSchema.methods.updateLastMessage = function (messageData) {
   this.lastMessage = {
     content: messageData.content,
@@ -68,34 +66,24 @@ conversationSchema.methods.updateLastMessage = function (messageData) {
   return this.save();
 };
 
-//to increment unread countt
+
 conversationSchema.methods.incrementUnreadCount = function (userId) {
   const currentCount = this.unreadCounts.get(userId.toString()) || 0;
   this.unreadCounts.set(userId.toString(), currentCount + 1);
   return this.save();
 };
 
-//to reset unread countttttt
 conversationSchema.methods.resetUnreadCount = function (userId) {
   this.unreadCounts.set(userId.toString(), 0);
   return this.save();
 };
 
-//to check if the given is part of a convo or not
 conversationSchema.methods.isParticipant = function (userId) {
   return this.participants.some(
     (participant) => participant.toString() === userId.toString()
   );
 };
 
-
-// find all convos that includes the given user
-conversationSchema.statics.findByParticipant = function (userId) {
-  return this.find({
-    participants: userId,
-    isActive: true,
-  }).sort({ "lastMessage.timestamp": -1 });
-};
 
 conversationSchema.statics.findByParticipant = function (userId) {
   return this.find({
@@ -111,7 +99,6 @@ conversationSchema.statics.findByParticipant = function (userId) {
 };
 
 
-//find direct convo between two users
 conversationSchema.statics.findDirectConversation = function (
   userId1,
   userId2
@@ -123,7 +110,6 @@ conversationSchema.statics.findDirectConversation = function (
 };
 
 
-// to create a direct convo between two users
 conversationSchema.statics.createDirectConversation = function (
   userId1,
   userId2
@@ -138,7 +124,6 @@ conversationSchema.statics.createDirectConversation = function (
   });
 };
 
-// Pre-save hook
 conversationSchema.pre("save", function (next) {
   this.participants.forEach((participantId) => {
     if (!this.unreadCounts.has(participantId.toString())) {

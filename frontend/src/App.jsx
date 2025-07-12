@@ -16,6 +16,7 @@ const App = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/chat" index element={<Home />} />
+          <Route path="/" index element={<Home />} />
         </Route>
         
         <Route path="/set-password" element={<SetPassword />} />

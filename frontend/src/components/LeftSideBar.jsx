@@ -38,9 +38,11 @@ import {
   fetchChatUsers,
   selectChatUsers,
   selectSidebarLoading,
+  updateLastMessage,
 } from "@/redux/slices/chat.slice";
 import { selectSelectedChat } from "@/redux/slices/chat.slice";
 import { selectUserInfo } from "@/redux/slices/user.slice";
+import socket from "@/utils/Socket";
 
 const LeftSideBar = ({}) => {
   const { setTheme } = useTheme();
@@ -50,13 +52,17 @@ const LeftSideBar = ({}) => {
   const chatUsers = useSelector(selectChatUsers);
   const loading = useSelector(selectSidebarLoading);
   const selectedUser = useSelector(selectSelectedChat);
-  const user = useSelector(selectUserInfo)
+  const user = useSelector(selectUserInfo);
+
+  useEffect(() => {
+    
+  },[]);
 
   useEffect(() => {
     dispatch(fetchChatUsers());
   }, [dispatch]);
 
-  if(loading) return <h1>Loadingg...</h1>
+  if (loading) return <h1>Loadingg...</h1>;
 
   return (
     <SidebarProvider>
@@ -78,9 +84,7 @@ const LeftSideBar = ({}) => {
                         key={user._id}
                         user={user}
                         className={`${
-                          selectedUser?._id === user?._id
-                            ? "bg-muted"
-                            : null
+                          selectedUser?._id === user?._id ? "bg-muted" : null
                         }`}
                       ></ChatListItem>
                     ))}

@@ -52,25 +52,123 @@ const init = (io) => {
 
     await broadcastOnlineUsers();
 
-    socket.on("send_message", async ({ to, content, selectedUser }) => {
+    socket.on("send_message", async ({ to, content, type = "text" }) => {
       try {
+        console.log("From: ", socket.userId);
+        console.log("to: ", to);
         const from = socket.userId;
-        const { status, payload } = await sendMessageService({
+
+        const senderSelectedUser = await redisClient.get(`active_chat:${from}`);
+        console.log("Sender selected user: ", senderSelectedUser);
+
+        const message = await sendMessageService({
           from,
           to,
           content,
+          type,
+          selectedUser: senderSelectedUser,
+        });
+
+        let conversation = await Conversation.findDirectConversation(from, to);
+        if (!conversation) {
+          conversation = await Conversation.createDirectConversation(from, to);
+        }
+
+        await conversation.updateLastMessage({
+          content: message.content,
+          senderId: from,
+          type: type,
         });
 
         const targetSocketId = await redisClient.hGet("online_users", to);
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("receive_message", payload);
-        }
-        socket.emit("update_last_message",{to,content})
+        console.log("Target Socket id: ", targetSocketId);
 
-        socket.emit("message_sent", payload);
+        if (targetSocketId) {
+          console.log("Recipient is online");
+
+          const recipientSelectedUser = await redisClient.get(
+            `active_chat:${to}`
+          );
+          console.log("Recipient selected user: ", recipientSelectedUser);
+
+          io.to(targetSocketId).emit("receive_message", message);
+
+          if (recipientSelectedUser === from) {
+            console.log(
+              "Recipient has this chat selected - no unread count increment"
+            );
+
+            io.to(targetSocketId).emit("update_lastmessage", {
+              id: from,
+              content: message.content,
+              timestamp: message.timestamp,
+              sender: from,
+              type: type,
+            });
+          } else {
+            console.log(
+              "Recipient online but different chat selected - increment unread count"
+            );
+
+            await conversation.incrementUnreadCount(to);
+
+            socket.emit("update_lastmessage", {
+              id: from,
+              content: message.content,
+              timestamp: message.timestamp,
+              sender: from,
+              type: type,
+              incrementUnread: true,
+            });
+          }
+        } else {
+          console.log(
+            "Recipient is offline - increment unread count and save to DB"
+          );
+
+          await conversation.incrementUnreadCount(to);
+          await redisClient.lPush(
+            `offline_messages:${to}`,
+            JSON.stringify({
+              ...message,
+              delivered: false,
+            })
+          );
+        }
+
+        if (senderSelectedUser !== to) {
+          console.log("Sender not in this chat - update their unread count");
+          socket.emit("update_unreadcount", { to });
+        }
+
+        console.log("Message: ", message);
+        socket.emit("message_sent", message);
       } catch (err) {
         console.error("Message send error:", err.message);
         socket.emit("message_error", { error: err.message });
+      }
+    });
+
+    socket.on("active_chat", async ({ selectedUser }) => {
+      try {
+        await redisClient.set(`active_chat:${socket.userId}`, selectedUser);
+
+        const convo = await Conversation.findDirectConversation(
+          socket.userId,
+          selectedUser
+        );
+
+        console.log("Convo: ", convo);
+        if (!convo) {
+          console.warn(
+            `No conversation found between ${socket.userId} and ${selectedUser}`
+          );
+          return;
+        }
+
+        await convo.resetUnreadCount(socket.userId);
+      } catch (err) {
+        console.error("Error handling active_chat event:", err);
       }
     });
 
@@ -97,7 +195,6 @@ const init = (io) => {
       io.to(to).emit("stop_typing", { from: socket.userId });
     });
 
-    // ✅ Manual logout
     socket.on("manual_logout", async () => {
       await redisClient.hDel("online_users", socket.userId);
       socket.leave(socket.userId);
@@ -105,9 +202,9 @@ const init = (io) => {
       await broadcastOnlineUsers();
     });
 
-    // ✅ Disconnect
     socket.on("disconnect", async () => {
       await redisClient.hDel("online_users", socket.userId);
+      await redisClient.del(`active_chat:${socket.userId}`);
       socket.leave(socket.userId);
       console.log(`${socket.userId} disconnected`);
       await broadcastOnlineUsers();

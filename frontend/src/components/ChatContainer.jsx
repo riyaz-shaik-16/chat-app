@@ -17,7 +17,7 @@ const ChatContainer = ({ className = "" }) => {
 
   const messages = useSelector(selectMessages) || []
   console.log("MEssages: ",messages);
-  const isTyping = true
+  const isTyping = false;
 
   const handleTyping = () => {}
 

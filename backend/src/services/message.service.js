@@ -9,6 +9,12 @@ export const sendMessageService = async ({
   type = "text",
   selectedUser = null,
 }) => {
+
+  console.log("from in service: ",from);
+  console.log("To in service: ",to)
+  console.log("Content in service: ",content);
+  console.log("Type in service: ",type);
+  console.log("SelectedUser in service: ",selectedUser);
   if (!from || !to || !content?.trim()) {
     throw new ApiError(400, "Missing required fields");
   }
@@ -18,7 +24,7 @@ export const sendMessageService = async ({
     conversation = await Conversation.createDirectConversation(from, to);
   }
 
-  const message = await Message.create({
+  const message = await Message.createAndPopulate({
     conversationId: conversation._id,
     senderId: from,
     receiverId: to,

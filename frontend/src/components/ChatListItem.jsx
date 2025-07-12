@@ -3,16 +3,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { SidebarMenuItem } from "./ui/sidebar";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
-import { setSelectedChat } from "@/redux/slices/chat.slice";
+import { resetUnread, setSelectedChat } from "@/redux/slices/chat.slice";
 import { selectOnlineUsers } from "@/redux/slices/presence.slice";
+import socket from "@/utils/Socket";
 
 const ChatListItem = ({ user, className = "" }) => {
   const dispatch = useDispatch();
   const onlineUsers = useSelector(selectOnlineUsers);
+
+  const handleSelectChat = (user) => {
+    dispatch(setSelectedChat(user));
+    dispatch(resetUnread(user?._id));
+    socket.emit("active_chat",{selectedUser:user?._id})
+  }
   return (
     <SidebarMenuItem
       key={user?._id}
-      onClick={() => dispatch(setSelectedChat(user))}
+      onClick={()=>handleSelectChat(user)}
     >
       <button
         className={`w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-muted transition-colors ${className}`}

@@ -2,18 +2,53 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SendHorizonal } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserInfo } from "@/redux/slices/user.slice";
+import socket from "@/utils/Socket";
+import { selectSelectedChat } from "@/redux/slices/chat.slice";
+import { addMessage } from "@/redux/slices/message.slice";
 
 const ChatInput = ({ handleTyping = () => {} }) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
   const user = useSelector(selectUserInfo);
+  const selectedUser = useSelector(selectSelectedChat);
+  const dispatch = useDispatch();
 
-  
+
+  useEffect(()=>{
+    socket.on("message_sent",(payload)=>{
+      dispatch(addMessage(payload));
+    })
+
+    socket.on("receive_message",(data)=>{
+      dispatch(addMessage(data));
+    })
+
+    socket.on("update_lastmessage", (data) => {
+      // updateLastMessage(data);
+
+      // if (data.incrementUnread) {
+      //   incrementUnreadCountInSidebar(data.id);
+      // }
+      console.log("Payload received for updating last message: ",data);
+    });
+
+    return () => {
+      socket.off("message_sent");
+      socket.off("update_lastmessage");
+      socket.off("receive_message");
+    }
+  },[])
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    socket.emit("send_message", {
+      to: selectedUser?._id,
+      content: message.trim(),
+      type:"text"
+    });
+    setMessage("");
   };
 
   const handleKeyDown = (e) => {
