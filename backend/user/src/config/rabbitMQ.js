@@ -1,38 +1,28 @@
-import amqp from "amqplib";
-// import dotenv from ""
+import amql from "amqplib";
 
-let channel = null;
-const hostname = process.env.RABBITMQ_HOSTNAME;
-const username = process.env.RABBITMQ_USERNAME;
-const password = process.env.RABBITMQ_PASSWORD;
-
-if(!hostname || !username || !password){
-  console.log(".env variables not initialized!!")
-  process.exit(1);
-}
+let channel;
 
 export const connectRabbitMQ = async () => {
   try {
-    const connection = await amqp.connect({
+    const connection = await amql.connect({
       protocol: "amqp",
-      hostname,
+      hostname: process.env.Rabbitmq_Host,
       port: 5672,
-      username,
-      password,
+      username: process.env.Rabbitmq_Username,
+      password: process.env.Rabbitmq_Password,
     });
 
     channel = await connection.createChannel();
 
-    // console.log("Channel: ",channel);
+    console.log("✅ connected to rabbitmq");
   } catch (error) {
-    console.log("Failed to connect to rabbitmq: ", error);
-    process.exit(1);
+    console.log("Failed to connect to rabbitmq", error);
   }
 };
 
 export const publishToQueue = async (queueName, message) => {
   if (!channel) {
-    console.log("Rabbitmq channel not initialized!!");
+    console.log("Rabbitmq channel is not initalized");
     return;
   }
 

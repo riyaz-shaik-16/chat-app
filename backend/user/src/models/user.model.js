@@ -13,11 +13,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
       match: [/.+@.+\..+/, "Please enter a valid email address"],
-    },
-    picture:{
-      type:"String",
-      default:""
-    },
+    }
   },
   { timestamps: true }
 );

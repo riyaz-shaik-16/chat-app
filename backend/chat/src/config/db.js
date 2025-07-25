@@ -1,19 +1,21 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv"
-dotenv.config()
 
-const connectDB = async () => {
-    const url = process.env.MONGODB_URI;
-    if(!url) throw new Error("Mongodb uri not defined!");
+const connectDb = async () => {
+  const url = process.env.MONGODB_URI;
 
-    try {
-        await mongoose.connect(url,{
-            dbName:"chat-app-using-microservices"
-        })
-    } catch (error) {
-        console.log("Error in connecting to mongodb: ",error.message); 
-        process.exit(1);
-    }
-}
+  if (!url) {
+    throw new Error("MONGO_URI is not defined in enviroment variables");
+  }
 
-export default connectDB;
+  try {
+    await mongoose.connect(url, {
+      dbName: "Chatappmicroserviceapp",
+    });
+    console.log("Connected to mongodb");
+  } catch (error) {
+    console.error("Failed to connect to Mongodb", error);
+    process.exit(1);
+  }
+};
+
+export default connectDb;

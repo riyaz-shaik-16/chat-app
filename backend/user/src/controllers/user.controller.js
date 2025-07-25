@@ -1,34 +1,25 @@
-import { redisClient } from "../config/redisClient.js";
-import { publishToQueue } from "../config/rabbitMQ.js";
+import { generateToken } from "../config/generateToken.js";
+import { publishToQueue } from "../config/rabbitmq.js";
+import { redisClient } from "../index.js";
 import User from "../models/user.model.js";
-import jwt from "jsonwebtoken";
 
-export const login = async (req, res) => {
+// loginUser
+export const loginUser = async (req, res) => {
   try {
-    console.log("In login controller to send otp");
-    console.log("REQ body: ", req?.body);
     const { email } = req.body;
 
-    if (!email)
-      return res.status(400).json({
-        success: false,
-        message: "Email required!",
-      });
-
     const rateLimitKey = `otp:ratelimit:${email}`;
-
     const rateLimit = await redisClient.get(rateLimitKey);
-
-    if (rateLimit)
-      return res.status(429).json({
-        sucsess: true,
-        message: "Please wait for a sec!",
+    if (rateLimit) {
+      res.status(429).json({
+        message: "Too may requests. Please wait before requesting new opt",
       });
+      return;
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const otpKey = `otp:${email}`;
-
     await redisClient.set(otpKey, otp, {
       EX: 300,
     });
@@ -39,148 +30,118 @@ export const login = async (req, res) => {
 
     const message = {
       to: email,
-      subject: "Your Otp",
-      body: `Use this: ${otp}. This otp is valid for next 5min.`,
+      subject: "Your otp code",
+      body: `Your OTP is ${otp}. It is valid for 5 minutes`,
     };
 
     await publishToQueue("send-otp", message);
 
-    return res.status(200).json({
-      success: true,
-      message: "Message sent successfully!",
+    res.status(200).json({
+      message: "OTP sent to your mail",
     });
   } catch (error) {
-    console.log("Error in login: ", error);
-    return res.status(500).json({
-      success: true,
-      message: "Internal Server Error!",
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
+// verifyUser
 export const verifyUser = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, otp: enteredOtp } = req.body;
 
-    console.log("in verofy user!");
-
-    console.log("REQ body: ", req?.body);
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields required!",
+    if (!email || !enteredOtp) {
+      res.status(400).json({
+        message: "Email and OTP Required",
       });
+      return;
     }
 
     const otpKey = `otp:${email}`;
 
-    const originalOtp = await redisClient.get(otpKey);
+    const storedOtp = await redisClient.get(otpKey);
 
-    if (!originalOtp || originalOtp !== otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP!",
+    if (!storedOtp || storedOtp !== enteredOtp) {
+      res.status(400).json({
+        message: "Invalid or expired OTP",
       });
+      return;
     }
 
     await redisClient.del(otpKey);
 
     let user = await User.findOne({ email });
 
-    if (!user || user.length === 0) {
-      user = await User.create({ name: email.slice(0, 8), email });
+    if (!user) {
+      const name = email.slice(0, 8);
+      user = await User.create({ name, email });
     }
 
-    const token = jwt.sign(
-      { _id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
+    const token = generateToken(user);
 
-    const isProd = process.env.DEVELOPMENT_ENVIRONMENT === "PRODUCTION";
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: isProd,
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: isProd ? "none" : "lax",
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Logged in successfully!",
+    res.json({
+      message: "User Verified",
       user,
-      token
+      token,
     });
   } catch (error) {
-    console.log("Error in login: ", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error!",
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-export const getProfile = (req, res) => {
-  console.log("Req user: ",req?.user);
-  return res.status(200).json({
-    success: true,
-    message: "Profile Fetched Successfully!",
-    user: req?.user,
-  });
-};
-
-export const logout = (req, res) => {
-  if (req.user) {
-    res.clearCookie("token");
-    delete req.user;
-    return res.status(200).json({
-      success: true,
-      message: "Logged out successfully!",
-    });
+// myProfile
+export const myProfile = async (req, res) => {
+  try {
+    const user = req.user;
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
+// updateName
+export const updateName = async (req, res) => {
+  try {
+    const user = await User.findById(req.user?._id);
+
+    if (!user) {
+      res.status(404).json({
+        message: "Please login",
+      });
+      return;
+    }
+
+    user.name = req.body.name;
+
+    await user.save();
+
+    const token = generateToken(user);
+
+    res.json({
+      message: "User Updated",
+      user,
+      token,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// getAllUsers
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
-    return res.status(200).json({
-      success: true,
-      message: "Users fetched successfully!",
-      users,
-    });
+    res.json(users);
   } catch (error) {
-    console.log("Error in get users: ", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error!",
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-export const getUser = async (req, res) => {
+// getAUser
+export const getAUser = async (req, res) => {
   try {
-    const id = req.params.id;
-    const user = await User.findById(id);
-    if (!user || user.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user id",
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      messages: "Fetched user data successfully!",
-      user,
-    });
+    const user = await User.findById(req.params.id);
+    res.json(user);
   } catch (error) {
-    console.log("Error in get user: ", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error!",
-    });
+    res.status(500).json({ message: error.message });
   }
 };

@@ -1,41 +1,36 @@
-import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
-export const verifyJwt = async (req, res, next) => {
+export const isAuth = async (req, res, next) => {
   try {
+    const authHeader = req.headers.authorization;
 
-    console.log("this hit!");
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
-
-      console.log("Token: ",token);
-
-    if (!token) {
-      return res.status(400).json({
-        success: false,
-        message: "Session Expired! Please login",
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({
+        message: "Please Login - No auth header",
       });
+      return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded: ",decoded);
+    const token = authHeader.split(" ")[1];
 
-    const user = await User.findOne({ email: decoded.email });
+    const decodedValue = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
 
-    if (!user || user.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid token!",
+    if (!decodedValue || !decodedValue.user) {
+      res.status(401).json({
+        message: "Invalid token",
       });
+      return;
     }
 
-    req.user = user;
+    req.user = decodedValue.user;
+
     next();
   } catch (error) {
-    console.log("Error in auth middleware: ", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
+    res.status(401).json({
+      message: "Please Login - JWT error",
     });
   }
 };

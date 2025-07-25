@@ -1,33 +1,42 @@
 import jwt from "jsonwebtoken";
 
-const verifyJwt = async (req, res, next) => {
+export const isAuth = async (req, res, next) => {
   try {
+    const authHeader = req.headers.authorization;
 
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
-
-
-    if (!token) {
-      return res.status(400).json({
-        success: false,
-        message: "Session Expired! Please login",
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({
+        message: "Please Login - No Auth header",
       });
+      return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = authHeader.split(" ")[1];
 
-    req.user = {
-        _id:decoded._id,
-        email:decoded.email
-    };
+    let decodedValue;
+    try {
+      decodedValue = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      res.status(401).json({
+        message: "Invalid token",
+      });
+      return;
+    }
+
+    if (!decodedValue || !decodedValue.user) {
+      res.status(401).json({
+        message: "Invalid token",
+      });
+      return;
+    }
+
+    req.user = decodedValue.user;
+
     next();
   } catch (error) {
-    console.log("Error in auth middleware: ", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
+    res.status(401).json({
+      message: "Please Login - JWT error",
     });
   }
 };
 
-export default verifyJwt;

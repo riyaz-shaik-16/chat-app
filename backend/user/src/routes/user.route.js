@@ -1,14 +1,21 @@
 import express from "express";
-import { verifyJwt } from "../middlewares/auth.middleware.js";
-import { login, verifyUser, getProfile, logout, getAllUsers, getUser } from "../controllers/user.controller.js";
+import {
+  getAllUsers,
+  getAUser,
+  loginUser,
+  myProfile,
+  updateName,
+  verifyUser,
+} from "../controllers/user.controller.js";
+import { isAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/login", login);
-router.post("/verify-user", verifyUser);
-router.get("/get-profile",verifyJwt,getProfile)
-router.post("/logout",verifyJwt,logout);
-router.get("/get-users",getAllUsers)
-router.get("/get-user/:id",getUser)
+router.post("/login", loginUser);
+router.post("/verify", verifyUser);
+router.get("/me", isAuth, myProfile);
+router.get("/user/all", isAuth, getAllUsers);
+router.get("/user/:id", getAUser);
+router.post("/update/user", isAuth, updateName);
 
 export default router;

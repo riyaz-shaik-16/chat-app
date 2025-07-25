@@ -1,40 +1,36 @@
 import express from "express";
 import dotenv from "dotenv";
+import connectDb from "./config/db.js";
+import { createClient } from "redis";
+import userRoutes from "./routes/user.route.js";
+import { connectRabbitMQ } from "./config/rabbitmq.js";
+import cors from "cors";
+
 dotenv.config();
-import connectDB from "./config/db.js";
-import { redisClient } from "./config/redisClient.js";
-import { connectRabbitMQ } from "./config/rabbitMQ.js";
-import cookieParser from "cookie-parser"
-import userRoutes from "./routes/user.route.js"
-import cors from "cors"
 
+connectDb();
 
+connectRabbitMQ();
 
-export const app = express();
+export const redisClient = createClient({
+  url: process.env.REDIS_URI,
+});
+
+redisClient
+  .connect()
+  .then(() => console.log("connected to redis"))
+  .catch(console.error);
+
+const app = express();
+
 app.use(express.json());
-app.use(cookieParser());
-app.use(cors({
-  origin:process.env.FRONTEND_URI,
-  credentials:true,
-}))
 
-app.use("/api/user",userRoutes);
+app.use(cors());
 
-const port = process.env.port || 6000;
+app.use("/api/v1", userRoutes);
 
-(async () => {
-  try {
-    await connectDB();
-    console.log("Mongodb connected!");
-    await redisClient.connect();
-    console.log("Redis connected!");
-    await connectRabbitMQ();
-    console.log("RabbitMQ connected!");
-    app.listen(port, () => {
-      console.log(`app listening on port: ${port}`);
-    });
-  } catch (error) {
-    console.log("Error in start server: ", error);
-    process.exit(1);
-  }
-})();
+const port = process.env.PORT;
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
