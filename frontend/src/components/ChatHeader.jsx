@@ -1,71 +1,50 @@
-// import { User } from "../context/AppContext";
 import { Menu, UserCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-const ChatHeader = ({
-  user,
-  setSidebarOpen,
-  isTyping,
-  onlineUsers,
-}) => {
+const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
   const isOnlineUser = user && onlineUsers.includes(user._id);
+
   return (
     <>
       {/* mobile menu toggle */}
       <div className="sm:hidden fixed top-4 right-4 z-30">
-        <button
-          className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+        <Button
+          size="icon"
+          variant="ghost"
+          className="bg-muted hover:bg-muted/80"
           onClick={() => setSidebarOpen(true)}
         >
-          <Menu className="w-5 h-5 text-gray-200" />
-        </button>
+          <Menu className="w-5 h-5 text-foreground" />
+        </Button>
       </div>
 
       {/* chat header */}
-      <div className="mb-6 bg-gray-800 rounded-lg border border-gray-700 p-6">
+      <Card className="mb-6 border p-6">
         <div className="flex items-center gap-4">
           {user ? (
             <>
               <div className="relative">
-                <div
-                  className="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center
-                "
-                >
-                  <UserCircle className="w-8 h-8 text-gray-300" />
+                <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+                  <UserCircle className="w-8 h-8 text-muted-foreground" />
                 </div>
-                {/* online user setup */}
                 {isOnlineUser && (
-                  <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-500 border-2 border-gray-800">
-                    <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75"></span>
-                  </span>
+                  <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-background"></span>
                 )}
               </div>
 
-              {/* user info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-2xl font-bold text-white truncate">
+                  <h2 className="text-2xl font-bold text-foreground truncate">
                     {user.name}
                   </h2>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {isTyping ? (
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></div>
-                        <div
-                          className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.1s" }}
-                        ></div>
-                        <div
-                          className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        ></div>
-                      </div>
-                      <span className="text-blue-500 font-medium">
-                        typing...
-                      </span>
-                    </div>
+                    <span className="text-sm font-medium text-primary">
+                      typing...
+                    </span>
                   ) : (
                     <div className="flex items-center gap-2">
                       <div
@@ -75,10 +54,10 @@ const ChatHeader = ({
                       ></div>
                       <span
                         className={`text-sm font-medium ${
-                          isOnlineUser ? "text-green-500" : "text-gray-400"
+                          isOnlineUser ? "text-green-500" : "text-muted-foreground"
                         }`}
                       >
-                        {isOnlineUser ? "Online" : "Offline"}{" "}
+                        {isOnlineUser ? "Online" : "Offline"}
                       </span>
                     </div>
                   )}
@@ -87,21 +66,21 @@ const ChatHeader = ({
             </>
           ) : (
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center">
-                <UserCircle className="w-8 h-8 text-gray-300" />
+              <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+                <UserCircle className="w-8 h-8 text-muted-foreground" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-400">
+                <h2 className="text-2xl font-bold text-muted-foreground">
                   Select a conversation
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground/70 mt-1">
                   Choose a chat from the sidebar to start messaging
                 </p>
               </div>
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </>
   );
 };
