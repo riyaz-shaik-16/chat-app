@@ -1,10 +1,16 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { Mail, ArrowRight, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
 import Loading from "../components/Loading";
 import { useAppData, user_service } from "../context/AppContext";
-import axios from "axios";
-import { ArrowRight, Loader2, Mail } from "lucide-react";
-import React, { useState } from "react";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -35,58 +41,52 @@ const LoginPage = () => {
   if (isAuth) return redirect("/chat");
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-8">
-          <div className="text-center mb-8">
-            <div className="mx-auto w-20 h-20 bg-blue-600 rounded-lg flex items-center justify-center mb-6">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background text-foreground">
+      <div className="w-full max-w-md">
+        <Card className="shadow-xl">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-20 h-20 bg-primary rounded-lg flex items-center justify-center mb-4">
               <Mail size={40} className="text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-white mb-3">
-              Welcome To ChatApp
-            </h1>
-            <p className="text-gray-300 text-lg">
+            <CardTitle className="text-3xl font-bold">Welcome To ChatApp</CardTitle>
+            <CardDescription className="text-base mt-2">
               Enter your email to continue your journey
-            </p>
-          </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-300 mb-2"
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading}
               >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="w-full px-4 py-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400"
-                placeholder="Enter Your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5" />
-                  Sending Otp to your mail...
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <span>Send Verification Code</span>
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-              )}
-            </button>
-          </form>
-        </div>
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin h-5 w-5" />
+                    Sending Otp to your mail...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <span>Send Verification Code</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </div>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

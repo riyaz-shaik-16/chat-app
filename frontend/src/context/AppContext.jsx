@@ -24,11 +24,15 @@ export const AppProvider = ({ children }) => {
     try {
       const token = Cookies.get("token");
 
+      console.log("Token in app context: ",token);
+
       const { data } = await axios.get(`${user_service}/api/v1/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      console.log("data in fetch user: ",data);
 
       setUser(data);
       setIsAuth(true);
@@ -82,6 +86,8 @@ export const AppProvider = ({ children }) => {
     fetchChats();
     fetchUsers();
   }, []);
+
+  console.log("User in app context: ",user);
 
   return (
     <AppContext.Provider

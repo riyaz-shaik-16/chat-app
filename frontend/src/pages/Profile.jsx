@@ -52,7 +52,7 @@ const ProfilePage = () => {
     if (!isAuth && !loading) {
       navigate("/login");
     }
-  }, [isAuth, router, loading]);
+  }, [isAuth, navigate, loading]);
 
   if (loading) return <Loading />;
   return (

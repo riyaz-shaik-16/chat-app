@@ -209,7 +209,7 @@ const ChatSidebar = ({
       {/* footer */}
       <div className="p-4 border-t border-gray-700 space-y-2">
         <Link
-          href={"/profile"}
+          to={"/profile"}
           className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors"
         >
           <div className="p-1.5 bg-gray-700 rounded-lg">

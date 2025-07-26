@@ -7,10 +7,10 @@ export const startSendOtpConsumer = async () => {
   try {
     const connection = await amqp.connect({
       protocol: "amqp",
-      hostname: process.env.Rabbitmq_Host,
+      hostname: process.env.RABBITMQ_HOSTNAME,
       port: 5672,
-      username: process.env.Rabbitmq_Username,
-      password: process.env.Rabbitmq_Password,
+      username: process.env.RABBITMQ_USERNAME,
+      password: process.env.RABBITMQ_PASSWORD,
     });
 
     const channel = await connection.createChannel();
@@ -30,8 +30,8 @@ export const startSendOtpConsumer = async () => {
             host: "smtp.gmail.com",
             port: 465,
             auth: {
-              user: process.env.USER,
-              pass: process.env.PASSWORD,
+              user: process.env.EMAIL_ID,
+              pass: process.env.EMAIL_PASSWORD,
             },
           });
 

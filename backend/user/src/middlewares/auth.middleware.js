@@ -1,35 +1,37 @@
 import jwt from "jsonwebtoken";
 
-export const isAuth = async (req, res, next) => {
+// Remove 'async' - this might be the issue!
+export const isAuth = (req, res, next) => {
+  console.log("🔍 === AUTH MIDDLEWARE STARTED ===");
+  
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Please Login - No auth header",
       });
-      return;
     }
 
     const token = authHeader.split(" ")[1];
-
-    const decodedValue = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decodedValue = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decodedValue || !decodedValue.user) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Invalid token",
       });
-      return;
     }
 
     req.user = decodedValue.user;
-
+    console.log("✅ About to call next()");
+    
     next();
+    
+    console.log("✅ next() called - middleware complete");
+    
   } catch (error) {
-    res.status(401).json({
+    console.log("💥 Error in middleware: ", error);
+    return res.status(401).json({
       message: "Please Login - JWT error",
     });
   }

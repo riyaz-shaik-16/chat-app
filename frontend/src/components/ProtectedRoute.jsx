@@ -2,12 +2,17 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAppData } from "../context/AppContext.jsx";
 
-const PublicRoute = ({ children }) => {
+const ProtectedRoute = ({ children }) => {
   const { isAuth, loading } = useAppData();
+
+  console.log("is auth im protected route",isAuth);
 
   if (loading) return <div>Loading...</div>;
 
-  return !isAuth ? children : <Navigate to="/chats" />;
+  console.log("Is Auth: in ProtectedRoute:", isAuth);
+  console.log("Loading: in ProtectedRoute:", loading);
+
+  return isAuth ? children : <Navigate to="/login" />;
 };
 
-export default PublicRoute;
+export default ProtectedRoute;

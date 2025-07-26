@@ -47,14 +47,21 @@ export const loginUser = async (req, res) => {
 // verifyUser
 export const verifyUser = async (req, res) => {
   try {
+    console.log("In verify user:");
+    console.log("Req body: ",req?.body);
     const { email, otp: enteredOtp } = req.body;
+
+    console.log("Email and otp: ",email,enteredOtp);
 
     if (!email || !enteredOtp) {
       res.status(400).json({
         message: "Email and OTP Required",
       });
       return;
+
+      
     }
+    console.log("Getting otp from redis")
 
     const otpKey = `otp:${email}`;
 
@@ -67,9 +74,13 @@ export const verifyUser = async (req, res) => {
       return;
     }
 
+    console.log("OTP verified!");
+
     await redisClient.del(otpKey);
 
     let user = await User.findOne({ email });
+
+    console.log("USer: ",user);
 
     if (!user) {
       const name = email.slice(0, 8);
@@ -90,10 +101,18 @@ export const verifyUser = async (req, res) => {
 
 // myProfile
 export const myProfile = async (req, res) => {
+  console.log("🎯 === CONTROLLER STARTED ===");
+  console.log("📝 In my profile controller!");
+  
   try {
+    console.log("👤 Req user: ", req?.user);
     const user = req.user;
+    
+    console.log("📤 Sending response with user data");
     res.json(user);
+    
   } catch (error) {
+    console.log("💥 Error in my profile controller: ", error);
     res.status(500).json({ message: error.message });
   }
 };

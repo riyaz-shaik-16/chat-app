@@ -1,3 +1,4 @@
+
 import ChatSidebar from "../components/ChatSidebar";
 import Loading from "../components/Loading";
 import { chat_service, useAppData } from "../context/AppContext.jsx";
@@ -23,6 +24,10 @@ const ChatApp = () => {
     setChats,
   } = useAppData();
 
+  console.log("In chat app");
+
+  console.log("User in chat page: ",loggedInUser);
+
   const { onlineUsers, socket } = SocketData();
 
   const [selectedUser, setSelectedUser] = useState(null);
@@ -41,7 +46,7 @@ const ChatApp = () => {
     if (!isAuth && !loading) {
       navigate("/login");
     }
-  }, [isAuth, router, loading]);
+  }, [isAuth, navigate, loading]);
 
   const handleLogout = () => logoutUser();
 
