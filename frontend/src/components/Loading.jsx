@@ -1,9 +1,15 @@
-import React from "react";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const Loading = () => {
+const Loading = ({ className }) => {
   return (
-    <div className="fixex inset-0 flex items-center justify-center bg-gray-900 min-h-screen">
-      <div className="h-12 w-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+    <div
+      className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm",
+        className
+      )}
+    >
+      <Loader2 className="h-10 w-10 animate-spin text-primary" />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { Mail, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, ArrowRight, Loader2, Inbox } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,7 @@ const LoginPage = () => {
         <Card className="shadow-xl">
           <CardHeader className="text-center">
             <div className="mx-auto w-20 h-20 bg-primary rounded-lg flex items-center justify-center mb-4">
-              <Mail size={40} className="text-white" />
+              <Inbox size={40} className="text-secondary"/>
             </div>
             <CardTitle className="text-3xl font-bold">Welcome To ChatApp</CardTitle>
             <CardDescription className="text-base mt-2">
