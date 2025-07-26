@@ -8,10 +8,10 @@ import { chat_service, useAppData } from "../context/AppContext.jsx";
 import { SocketData } from "../context/SocketContext.jsx";
 
 import Loading from "../components/Loading";
-import ChatSidebar from "../components/ChatSidebar";
-import ChatHeader from "../components/ChatHeader";
-import ChatMessages from "../components/ChatMessages";
-import MessageInput from "../components/MessageInput";
+import ChatSidebar from "../components/ChatSideBar.jsx";
+import ChatHeader from "../components/ChatHeader.jsx";
+import ChatMessages from "../components/ChatMessages.jsx";
+import MessageInput from "../components/MessageInput.jsx";
 
 const ChatApp = () => {
   const {

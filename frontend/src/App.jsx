@@ -1,13 +1,13 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-import LoginPage from "./pages/Login";
-import ChatPage from "./pages/Chat";
-import ProfilePage from "./pages/Profile";
-import Verify from "./pages/Verify"
+import LoginPage from "./pages/Login.jsx";
+import ChatPage from "./pages/Chat.jsx";
+import ProfilePage from "./pages/Profile.jsx";
+import Verify from "./pages/Verify.jsx"
 
-import PublicRoute from "./components/PublicRoute";
-import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 const App = () => {
   return (
