@@ -52,9 +52,12 @@ export const getAllChats = async (req, res) => {
 
     const chats = await Chat.find({ users: userId }).sort({ updatedAt: -1 });
 
+    console.log("All chats: ",chats);
+
     const chatWithUserData = await Promise.all(
       chats.map(async (chat) => {
         const otherUserId = chat.users.find((id) => id !== userId);
+        console.log("Otheruserid: ",otherUserId);
 
         const unseenCount = await Messages.countDocuments({
           chatId: chat._id,
@@ -64,9 +67,10 @@ export const getAllChats = async (req, res) => {
 
         try {
           const { data } = await axios.get(
-            `${process.env.USER_SERVICE}/api/v1/user/${otherUserId}`
+            `${process.env.USERSERVICE_URL}/api/v1/user/${otherUserId}`
           );
 
+          console.log("data in get all chats: ",data);
           return {
             user: data,
             chat: {
@@ -294,7 +298,7 @@ export const getMessagesByChat = async (req, res) => {
 
     try {
       const { data } = await axios.get(
-        `${process.env.USER_SERVICE}/api/v1/user/${otherUserId}`
+        `${process.env.USERSERVICE_URL}/api/v1/user/${otherUserId}`
       );
 
       if (!otherUserId) {

@@ -31,6 +31,8 @@ const ChatSidebar = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // users?.map((u)=>console.log(u.name));
+  console.log("Chats: ",chats);
   return (
     <aside
       className={`fixed z-20 sm:static top-0 left-0 h-screen w-80 bg-background border-r transition-transform duration-300 flex flex-col ${
@@ -127,6 +129,7 @@ const ChatSidebar = ({
                     isSelected ? "bg-primary text-white" : "hover:bg-muted"
                   }`}
                   onClick={() => {
+                    console.log("Selecte chat: ",chat);
                     setSelectedUser(chat.chat._id);
                     setSidebarOpen(false);
                   }}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
   const isOnlineUser = user && onlineUsers.includes(user._id);
+  console.log("User in header: ",user);
 
   return (
     <>

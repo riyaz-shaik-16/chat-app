@@ -7,11 +7,6 @@ import toast from "react-hot-toast";
 import { chat_service, useAppData } from "../context/AppContext.jsx";
 import { SocketData } from "../context/SocketContext.jsx";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-
 import Loading from "../components/Loading";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatHeader from "../components/ChatHeader";
@@ -54,6 +49,7 @@ const ChatApp = () => {
       const { data } = await axios.get(`${chat_service}/api/v1/message/${selectedUser}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("Data in fetching chat details: ",data);
       setMessages(data.messages);
       setUser(data.user);
       await fetchChats();

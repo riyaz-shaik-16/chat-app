@@ -43,6 +43,7 @@ const MessageInput = ({ selectedUser, message, setMessage, handleMessageSend }) 
 
       <div className="flex items-center gap-2">
         <label className="cursor-pointer">
+          <Paperclip size={18} />
           <Input
             type="file"
             accept="image/*"
@@ -54,9 +55,7 @@ const MessageInput = ({ selectedUser, message, setMessage, handleMessageSend }) 
               }
             }}
           />
-          <Button type="button" variant="outline" size="icon">
-            <Paperclip size={18} />
-          </Button>
+          
         </label>
 
         <Input
