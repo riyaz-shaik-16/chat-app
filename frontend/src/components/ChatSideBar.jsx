@@ -1,6 +1,4 @@
 import {
-  CornerDownRight,
-  CornerUpLeft,
   LogOut,
   MessageCircle,
   Plus,
@@ -32,7 +30,7 @@ const ChatSidebar = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   // users?.map((u)=>console.log(u.name));
-  console.log("Chats: ",chats);
+  console.log("Chats: ", chats);
   return (
     <aside
       className={`fixed z-20 sm:static top-0 left-0 h-screen w-80 bg-background border-r transition-transform duration-300 flex flex-col ${
@@ -61,10 +59,18 @@ const ChatSidebar = ({
           </div>
           <Button
             size="icon"
-            className={showAllUsers ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
+            className={
+              showAllUsers
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-green-600 hover:bg-green-700"
+            }
             onClick={() => setShowAllUsers((prev) => !prev)}
           >
-            {showAllUsers ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showAllUsers ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -104,7 +110,9 @@ const ChatSidebar = ({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-medium text-foreground">{u.name}</span>
+                        <span className="font-medium text-foreground">
+                          {u.name}
+                        </span>
                         <p className="text-xs text-muted-foreground">
                           {onlineUsers.includes(u._id) ? "Online" : "Offline"}
                         </p>
@@ -118,6 +126,7 @@ const ChatSidebar = ({
           <div className="space-y-2 overflow-y-auto h-full pb-4">
             {chats.map((chat) => {
               const latestMessage = chat.chat.latestMessage;
+              const messageType = chat.chat.latestMessage.messageType;
               const isSelected = selectedUser === chat.chat._id;
               const isSentByMe = latestMessage?.sender === loggedInUser?._id;
               const unseenCount = chat.chat.unseenCount || 0;
@@ -126,10 +135,10 @@ const ChatSidebar = ({
                 <Card
                   key={chat.chat._id}
                   className={`p-4 cursor-pointer ${
-                    isSelected ? "bg-primary text-white" : "hover:bg-muted"
+                    isSelected ? "bg-secondary" : "hover:bg-muted"
                   }`}
                   onClick={() => {
-                    console.log("Selecte chat: ",chat);
+                    console.log("Selecte chat: ", chat);
                     setSelectedUser(chat.chat._id);
                     setSidebarOpen(false);
                   }}
@@ -156,12 +165,11 @@ const ChatSidebar = ({
                       </div>
                       {latestMessage && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          {isSentByMe ? (
-                            <CornerUpLeft size={14} />
-                          ) : (
-                            <CornerDownRight size={14} />
-                          )}
-                          <span className="truncate flex-1">{latestMessage.text}</span>
+                          {isSentByMe ? "You:" : null}
+                          {messageType === "image" && "📷 Image"}
+                          <span className="truncate flex-1">
+                            {latestMessage.text}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -175,7 +183,9 @@ const ChatSidebar = ({
             <div className="p-4 bg-muted rounded-full mb-4">
               <MessageCircle className="w-8 h-8 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground font-medium">No conversation yet</p>
+            <p className="text-muted-foreground font-medium">
+              No conversation yet
+            </p>
             <p className="text-sm text-muted-foreground/70 mt-1">
               Start a new chat to begin messaging
             </p>
@@ -197,15 +207,14 @@ const ChatSidebar = ({
 
         <Button
           variant="ghost"
-          className="w-full flex gap-3 text-red-500 hover:text-white hover:bg-red-600"
+          className="w-full px-4 py-4 inline-flex justify-start cursor-pointer text-red-600 hover:text-white hover:bg-red-600"
           onClick={handleLogout}
         >
           <div className="p-1.5 bg-red-600 rounded-lg">
-            <LogOut className="w-4 h-4 text-white" />
+            <LogOut className="w-4 h-5 text-white" />
           </div>
           <span className="font-medium">Logout</span>
         </Button>
-        <span className="font-medium"><ModeToggle/></span>
       </div>
     </aside>
   );

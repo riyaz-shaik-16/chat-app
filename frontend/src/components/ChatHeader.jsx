@@ -8,7 +8,8 @@ const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
 
   return (
     <>
-      {/* mobile menu toggle */}
+    
+    {/* this is for sidebar */}
       <div className="sm:hidden fixed top-4 right-4 z-30">
         <Button
           size="icon"
@@ -20,13 +21,12 @@ const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
         </Button>
       </div>
 
-      {/* chat header */}
-      <Card className="mb-6 border p-6">
+      <Card className="mb-6 border p-3 rounded">
         <div className="flex items-center gap-4">
           {user ? (
             <>
               <div className="relative">
-                <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                   <UserCircle className="w-8 h-8 text-muted-foreground" />
                 </div>
                 {isOnlineUser && (
@@ -36,7 +36,7 @@ const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-2xl font-bold text-foreground truncate">
+                  <h2 className="text-foreground truncate">
                     {user.name}
                   </h2>
                 </div>
@@ -48,11 +48,11 @@ const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
                     </span>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <div
+                      {/* <div
                         className={`w-2 h-2 rounded-full ${
                           isOnlineUser ? "bg-green-500" : "bg-gray-500"
                         }`}
-                      ></div>
+                      ></div> */}
                       <span
                         className={`text-sm font-medium ${
                           isOnlineUser ? "text-green-500" : "text-muted-foreground"

@@ -42,7 +42,7 @@ const ChatMessages = ({ selectedUser, messages, loggedInUser }) => {
                   }`}
                 >
                   <Card
-                    className={`rounded-lg px-4 py-3 max-w-sm text-sm ${
+                    className={`${msg.messageType === "image" ? "pt-0 px-0 py-0 border-0" : "px-4 py-3"}  max-w-sm text-sm ${
                       isSentByMe
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-foreground"
@@ -52,7 +52,7 @@ const ChatMessages = ({ selectedUser, messages, loggedInUser }) => {
                       <img
                         src={msg.image.url}
                         alt="shared"
-                        className="max-w-full h-auto rounded-lg"
+                        className="max-w-full h-auto rounded"
                       />
                     )}
                     {msg.text && <p className="mt-1 break-words whitespace-pre-wrap">{msg.text}</p>}
@@ -68,6 +68,7 @@ const ChatMessages = ({ selectedUser, messages, loggedInUser }) => {
                       <div className="flex items-center ml-1">
                         {msg.seen ? (
                           <div className="flex items-center gap-1 text-blue-400">
+                            Seen At: 
                             <CheckCheck className="w-3 h-3" />
                             {msg.seenAt && (
                               <span>{moment(msg.seenAt).format("hh:mm A")}</span>

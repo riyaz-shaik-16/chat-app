@@ -63,7 +63,7 @@ const MessageInput = ({ selectedUser, message, setMessage, handleMessageSend }) 
           placeholder={imageFile ? "Add a caption..." : "Type a message..."}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="flex-1"
+          className="flex-1 h-13"
         />
 
         <Button
