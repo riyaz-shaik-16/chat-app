@@ -50,26 +50,23 @@ const ChatSidebar = ({
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-lg">
-              <MessageCircle className="w-5 h-5 text-white" />
-            </div>
             <h2 className="text-lg font-bold">
               {showAllUsers ? "New Chat" : "Messages"}
             </h2>
           </div>
           <Button
             size="icon"
-            className={
+            className={`${
               showAllUsers
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-green-600 hover:bg-green-700"
-            }
+            } cursor-pointer`}
             onClick={() => setShowAllUsers((prev) => !prev)}
           >
             {showAllUsers ? (
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 text-primary " />
             ) : (
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-primary" />
             )}
           </Button>
         </div>
@@ -195,6 +192,9 @@ const ChatSidebar = ({
 
       {/* Footer */}
       <div className="p-4 border-t space-y-2">
+        <div className="px-3">
+          <ModeToggle/>
+        </div>
         <Link
           to="/profile"
           className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted"
