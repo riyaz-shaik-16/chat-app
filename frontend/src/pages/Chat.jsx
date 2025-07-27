@@ -240,6 +240,7 @@ const ChatApp = () => {
 
       <div className="flex-1 flex flex-col border-l">
         {<ChatHeader
+          sidebarOpen={siderbarOpen}
           user={user}
           setSidebarOpen={setSiderbarOpen}
           isTyping={isTyping}

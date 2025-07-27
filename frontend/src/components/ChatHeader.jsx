@@ -1,24 +1,32 @@
-import { Menu, UserCircle } from "lucide-react";
+import { Menu, SidebarOpen, UserCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
+const ChatHeader = ({
+  user,
+  setSidebarOpen,
+  sidebarOpen,
+  isTyping,
+  onlineUsers,
+}) => {
   const isOnlineUser = user && onlineUsers.includes(user._id);
   console.log("User in header: ", user);
 
   return (
     <>
       {/* this is for sidebar */}
-      <div className="sm:hidden fixed top-4 right-4 z-30">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="bg-muted hover:bg-muted/80"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <Menu className="w-5 h-5 text-foreground" />
-        </Button>
-      </div>
+      {!sidebarOpen && (
+        <div className="sm:hidden fixed top-4 right-4 z-30">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="bg-muted hover:bg-muted/80"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="w-5 h-5 text-foreground" />
+          </Button>
+        </div>
+      )}
 
       {user && (
         <Card className="mb-6 border p-3 rounded">
