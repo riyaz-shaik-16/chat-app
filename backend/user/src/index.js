@@ -31,6 +31,10 @@ app.use("/api/v1", userRoutes);
 
 const port = process.env.PORT;
 
+app.get("/",(req,res) => {
+  res.send("User service running!");
+})
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
