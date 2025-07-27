@@ -32,7 +32,7 @@ const ChatMessages = ({ selectedUser, messages, loggedInUser }) => {
   }
 
   return (
-    <div className="flex-1overflow-hidden">
+    <div className="flex-1 overflow-hidden">
       <ScrollArea className="h-full max-h-[calc(100vh-215px)] px-4 py-2">
         <div className="space-y-4">
           {uniqueMessages.map((msg, index) => {
