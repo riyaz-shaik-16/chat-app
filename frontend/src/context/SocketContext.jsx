@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
 
     const newSocket = io("https://riyazcodes.duckdns.org", {
       withCredentials: true,
-      path:"/chat",
+      path:"/chat/",
       query: {
         userId: user._id,
       },
