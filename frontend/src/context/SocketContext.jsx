@@ -17,10 +17,10 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const newSocket = io("https://riyazcodes.duckdns.org/chat", {
+    const newSocket = io("https://riyazcodes.duckdns.org", {
       withCredentials: true,
-      path:"/chat/socket.io",
-      transports: ["websocket","polling"],
+      path: "/chat/socket.io/",
+      transports: ["websocket", "polling"],
       query: {
         userId: user._id,
       },
