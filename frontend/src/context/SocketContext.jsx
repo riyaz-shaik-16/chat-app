@@ -19,7 +19,6 @@ export const SocketProvider = ({ children }) => {
 
     const newSocket = io("https://riyazcodes.duckdns.org/chat", {
       withCredentials: true,
-      transports: ["websocket", "polling"],
       query: {
         userId: user._id,
       },
