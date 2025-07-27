@@ -128,7 +128,7 @@ const VerifyOtp = () => {
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6  flex items-center flex-col">
               <div className="text-center space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Enter your 6-digit OTP here
@@ -144,7 +144,7 @@ const VerifyOtp = () => {
                 >
                   <InputOTPGroup className="justify-center gap-2">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <InputOTPSlot key={i} index={i} />
+                      <InputOTPSlot key={i} index={i} className='h-12 w-12'/>
                     ))}
                   </InputOTPGroup>
                 </InputOTP>
