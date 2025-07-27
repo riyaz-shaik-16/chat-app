@@ -28,6 +28,10 @@ export const SocketProvider = ({ children }) => {
 
     setSocket(newSocket);
 
+    newSocket.on("connect", () => {
+      console.log("🔌 Connected:", socket.id);
+    });
+
     newSocket.on("getOnlineUser", (users) => {
       setOnlineUsers(users);
     });
