@@ -8,8 +8,8 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
-export const user_service = "http://13.60.192.144:5000";
-export const chat_service = "http://13.60.192.144:5002";
+export const user_service = "https://riyazcodes.duckdns.org/user";
+export const chat_service = "https://riyazcodes.duckdns.org/chat";
 
 const AppContext = createContext(undefined);
 
