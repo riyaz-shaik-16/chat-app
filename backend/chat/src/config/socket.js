@@ -16,6 +16,14 @@ const io = new Server(server, {
   },
 });
 
+io.engine.on('connection_error', (err) => {
+  console.log('❌ Engine.IO connection error:');
+  console.log('   Code:', err.code);
+  console.log('   Message:', err.message);
+  console.log('   Context:', err.context);
+  console.log('   URL:', err.req?.url);
+});
+
 
 const userSocketMap = {};
 
