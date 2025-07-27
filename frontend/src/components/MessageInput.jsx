@@ -21,7 +21,7 @@ const MessageInput = ({ selectedUser, message, setMessage, handleMessageSend }) 
   if (!selectedUser) return null;
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 border-t pt-4">
+    <form onSubmit={handleSubmit} className="flex fixedd b-0 flex-col gap-2 border-t pt-4">
       {imageFile && (
         <Card className="relative w-fit p-1">
           <img
