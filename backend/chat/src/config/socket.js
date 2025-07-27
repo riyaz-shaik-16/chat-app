@@ -8,13 +8,14 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  path:"/chat/",
+  path: "/chat/",
   cors: {
-    origin: "https://riyazcodes.duckdns.org",
-    methods: ["GET", "POST"],
+    origin: "https://chat-app-16.vercel.app",
     credentials: true,
-  }
+    methods: ["GET", "POST"],
+  },
 });
+
 
 const userSocketMap = {};
 
