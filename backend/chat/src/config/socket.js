@@ -11,6 +11,7 @@ const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URI,
     methods: ["GET", "POST"],
+    path:"/chat/",
     credentials: true,
   }
 });
