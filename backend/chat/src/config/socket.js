@@ -10,7 +10,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   path:"/chat/",
   cors: {
-    origin: process.env.FRONTEND_URI,
+    origin: "https://riyazcodes.duckdns.org",
     methods: ["GET", "POST"],
     credentials: true,
   }
