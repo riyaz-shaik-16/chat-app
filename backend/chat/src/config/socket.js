@@ -8,10 +8,10 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
+  path:"/chat/",
   cors: {
     origin: process.env.FRONTEND_URI,
     methods: ["GET", "POST"],
-    path:"/chat/",
     credentials: true,
   }
 });
