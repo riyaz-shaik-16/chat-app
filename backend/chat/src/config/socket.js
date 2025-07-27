@@ -12,8 +12,7 @@ const io = new Server(server, {
     origin: process.env.FRONTEND_URI,
     methods: ["GET", "POST"],
     credentials: true,
-  },
-  path: "/chat/socket.io",
+  }
 });
 
 const userSocketMap = {};
