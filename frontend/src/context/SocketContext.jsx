@@ -17,7 +17,8 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const newSocket = io("https://riyazcodes.duckdns.org/chat", {
+    const newSocket = io("https://riyazcodes.duckdns.org", {
+      path: "/chat/",
       withCredentials: true,
       query: {
         userId: user._id,
