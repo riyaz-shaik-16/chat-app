@@ -239,12 +239,12 @@ const ChatApp = () => {
       />
 
       <div className="flex-1 flex flex-col border-l">
-        <ChatHeader
+        {user && <ChatHeader
           user={user}
           setSidebarOpen={setSiderbarOpen}
           isTyping={isTyping}
           onlineUsers={onlineUsers}
-        />
+        />}
 
           <ChatMessages
             selectedUser={selectedUser}
