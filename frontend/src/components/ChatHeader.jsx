@@ -65,21 +65,7 @@ const ChatHeader = ({ user, setSidebarOpen, isTyping, onlineUsers }) => {
                 </div>
               </div>
             </>
-          ) : (
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
-                <UserCircle className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-muted-foreground">
-                  Select a conversation
-                </h2>
-                <p className="text-sm text-muted-foreground/70 mt-1">
-                  Choose a chat from the sidebar to start messaging
-                </p>
-              </div>
-            </div>
-          )}
+          ) : null}
         </div>
       </Card>
     </>
