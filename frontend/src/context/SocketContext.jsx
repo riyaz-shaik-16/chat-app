@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { chat_service, useAppData } from "./AppContext";
 
@@ -22,7 +17,10 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const newSocket = io(chat_service, {
+    const newSocket = io("https://riyazcodes.duckdns.org", {
+      path: "/chat/socket.io",
+      withCredentials: true,
+      transports: ["websocket"],
       query: {
         userId: user._id,
       },
