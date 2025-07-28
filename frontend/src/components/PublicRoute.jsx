@@ -8,7 +8,7 @@ const PublicRoute = ({ children }) => {
 
   if (loading) return <Loading/>;
 
-  return !isAuth ? children : <Navigate to="/chats" />;
+  return !isAuth ? children : <Navigate to="/chat" />;
 };
 
 export default PublicRoute;

@@ -5,6 +5,7 @@ import LoginPage from "./pages/Login.jsx";
 import ChatPage from "./pages/Chat.jsx";
 import ProfilePage from "./pages/Profile.jsx";
 import Verify from "./pages/Verify.jsx"
+import PageNotFound from "./pages/PageNotFound.jsx";
 
 import PublicRoute from "./components/PublicRoute.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -50,7 +51,7 @@ const App = () => {
         />
 
         {/* Default route */}
-        <Route path="*" element={<div>404 Not Found</div>} />
+        <Route path="*" element={<PageNotFound/>} />
       </Routes>
     </Router>
   );
