@@ -49,7 +49,7 @@ const ChatApp = () => {
       const { data } = await axios.get(`${chat_service}/api/v1/message/${selectedUser}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Data in fetching chat details: ",data);
+      // console.log("Data in fetching chat details: ",data);
       setMessages(data.messages);
       setUser(data.user);
       await fetchChats();

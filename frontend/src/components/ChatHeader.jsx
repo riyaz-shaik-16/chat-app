@@ -10,7 +10,7 @@ const ChatHeader = ({
   onlineUsers,
 }) => {
   const isOnlineUser = user && onlineUsers.includes(user._id);
-  console.log("User in header: ", user);
+  // console.log("User in header: ", user);
 
   return (
     <>

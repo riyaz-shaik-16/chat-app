@@ -28,11 +28,11 @@ export const SocketProvider = ({ children }) => {
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
-      console.log("🔌 Connected:", socket?.id);
+      // console.log("🔌 Connected:", socket?.id);
     });
 
     newSocket.on("connect_error", (err) => {
-      console.error("❌ Socket connect error:", err);
+      // console.error("❌ Socket connect error:", err);
     });
 
     newSocket.on("getOnlineUser", (users) => {
