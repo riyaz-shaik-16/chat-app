@@ -8,8 +8,8 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
-export const user_service = "https://riyazcodes.duckdns.org/user";
-export const chat_service = "https://riyazcodes.duckdns.org/chat";
+export const user_service = import.meta.env.VITE_USER_SERVICE;
+export const chat_service = import.meta.env.VITE_CHAT_SERVICE;
 
 const AppContext = createContext(undefined);
 

@@ -13,11 +13,12 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const { user } = useAppData();
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const socketUrl = import.meta.env.VITE_SOCKET_URI
 
   useEffect(() => {
     if (!user?._id) return;
 
-    const newSocket = io("https://riyazcodes.duckdns.org", {
+    const newSocket = io(socketUrl, {
       withCredentials: true,
       path:"/ws/",
       query: {
